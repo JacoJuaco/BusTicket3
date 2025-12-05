@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🔹 Conexión a SQL Server (usa tu DbContext real)
+// 🔹 Conexión a SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
@@ -15,7 +15,7 @@ builder.Services.AddSingleton<CloudinaryService>();
 // 🔹 MVC
 builder.Services.AddControllersWithViews();
 
-// 🔹 Sesión (solo una vez)
+// 🔹 Sesión
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -25,10 +25,17 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// 🔹 Manejo de errores
+// ----------------------------------------------------------------------
+// 🔹 Manejo de errores personalizados (404 y 500)
+// ----------------------------------------------------------------------
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    // Error 500
+    app.UseExceptionHandler("/Error/ServerError");
+
+    // Error 404 y otros códigos
+    app.UseStatusCodePagesWithReExecute("/Error/HttpStatus", "?code={0}");
+
     app.UseHsts();
 }
 
@@ -42,7 +49,7 @@ app.UseSession();
 
 app.UseAuthorization();
 
-// 🔹 Ruta inicial → Auth/Login
+// 🔹 Ruta por defecto → Auth/Login
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}"

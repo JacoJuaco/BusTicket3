@@ -11,7 +11,7 @@ namespace Busticket.Models
     {
         public int RutaId { get; set; }
 
-        // Lista de códigos de asientos seleccionados
+
         public List<string> Asientos { get; set; } = new List<string>();
 
         public decimal Total { get; set; }

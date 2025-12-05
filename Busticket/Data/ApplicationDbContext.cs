@@ -18,7 +18,7 @@ namespace Busticket.Data
         public DbSet<Oferta> Ofertas { get; set; }
         public DbSet<Resena> Reseñas { get; set; }
         public DbSet<Reporte> Reportes { get; set; }
-        public DbSet<Asiento> Asientos { get; set; }  // <-- CORRECTO
+        public DbSet<Asiento> Asientos { get; set; }  
         public DbSet<Venta> Ventas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,7 +37,7 @@ namespace Busticket.Data
 
             // --- Relaciones ---
 
-            // Ruta tiene muchos Asientos
+    
             modelBuilder.Entity<Asiento>()
               .HasOne(a => a.Ruta)
               .WithMany(r => r.Asientos)

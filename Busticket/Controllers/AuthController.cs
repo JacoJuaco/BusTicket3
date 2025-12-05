@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Busticket.Models;  // Para LoginViewModel, RegisterViewModel y Usuario
-using Busticket.Data;    // Para ApplicationDbContext
-using Microsoft.AspNetCore.Http; // Para HttpContext.Session
+using Busticket.Models;  
+using Busticket.Data;    
+using Microsoft.AspNetCore.Http; 
 
 namespace Busticket.Controllers
 {
@@ -9,7 +9,7 @@ namespace Busticket.Controllers
     {
         private readonly Data.ApplicationDbContext _context;
 
-        // Inyectamos DbContext
+       
         public AuthController(Data.ApplicationDbContext context)
         {
             _context = context;
@@ -19,7 +19,7 @@ namespace Busticket.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View(); // Debe existir Views/Auth/Login.cshtml
+            return View(); 
         }
 
         // POST: /Auth/Login
@@ -29,7 +29,7 @@ namespace Busticket.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // Autenticación básica: buscar usuario en la DB
+          
             var usuario = _context.Usuarios
                                   .FirstOrDefault(u => u.Email == model.Email && u.Password == model.Password);
 
@@ -47,7 +47,7 @@ namespace Busticket.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            return View(); // Debe existir Views/Auth/Register.cshtml
+            return View(); 
         }
 
         // POST: /Auth/Register
@@ -57,7 +57,6 @@ namespace Busticket.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // Verificar si ya existe el usuario
             var existe = _context.Usuarios.Any(u => u.Email == model.Email);
             if (existe)
             {
@@ -65,18 +64,18 @@ namespace Busticket.Controllers
                 return View(model);
             }
 
-            // Crear usuario y guardar en la DB
+          
             var usuario = new Usuario
             {
                 Nombre = model.Nombre,
                 Email = model.Email,
-                Password = model.Password // ⚠️ En producción, siempre hashea la contraseña
+                Password = model.Password 
             };
 
             _context.Usuarios.Add(usuario);
             _context.SaveChanges();
 
-            // Iniciar sesión automáticamente
+           
             HttpContext.Session.SetString("Usuario", usuario.Email);
 
             return RedirectToAction("Index", "Home");

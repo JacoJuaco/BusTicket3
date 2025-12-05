@@ -17,7 +17,7 @@
 
     <div class="w-full max-w-5xl p-6 flex flex-col lg:flex-row gap-12 scale-90">
 
-        <!-- IZQUIERDA - Formulario de pago -->
+      
         <div class="flex-1 bg-white p-6 rounded-xl shadow-lg">
             <h1 class="text-4xl md:text-5xl text-[#284D67] font-bold">BusTicket</h1>
 
@@ -72,7 +72,7 @@
                     </div>
                 </div>
 
-                <!-- Hidden inputs para los asientos seleccionados -->
+       
                 @if (Model.Asientos != null && Model.Asientos.Count > 0)
                 {
                     @foreach (var asiento in Model.Asientos)
@@ -89,7 +89,7 @@
             </form>
         </div>
 
-        <!-- DERECHA - Resumen de compra -->
+   
         <div class="flex-1 bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-lg">
             <h2 class="text-gray-600 text-xl md:text-2xl">Detalles de compra</h2>
             <h1 class="text-3xl md:text-5xl mt-4">$@Model.Total.ToString("N0") COP</h1>

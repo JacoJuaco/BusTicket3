@@ -21,7 +21,6 @@ namespace Busticket.Controllers
         // GET: /Pago/Index
         public IActionResult Index()
         {
-            // Obtener carrito y total desde la sesión
             var carritoJson = HttpContext.Session.GetString("Carrito");
             var totalString = HttpContext.Session.GetString("Total");
 
@@ -31,17 +30,17 @@ namespace Busticket.Controllers
 
             var total = decimal.TryParse(totalString, out var t) ? t : 0;
 
-            // Si hay asientos, obtener datos de la ruta (ejemplo usando el primer asiento)
             string origen = "", destino = "", empresa = "", duracion = "", fecha = "", hora = "";
             int rutaId = 0;
 
             if (asientos.Count > 0)
             {
-                // Obtener el primer asiento para determinar la ruta
                 var primerAsiento = _context.Asientos.FirstOrDefault(a => a.Codigo == asientos[0]);
+
                 if (primerAsiento != null)
                 {
                     var ruta = _context.Rutas.FirstOrDefault(r => r.RutaId == primerAsiento.RutaId);
+
                     if (ruta != null)
                     {
                         rutaId = ruta.RutaId;
@@ -49,8 +48,8 @@ namespace Busticket.Controllers
                         destino = ruta.Destino;
                         empresa = ruta.Empresa;
                         duracion = ruta.Duracion + " min";
-                        fecha = DateTime.Now.ToString("dd/MM/yyyy"); // o tu fecha real de viaje
-                        hora = "00:00"; // ejemplo, reemplaza con hora real si tienes
+                        fecha = DateTime.Now.ToString("dd/MM/yyyy");
+                        hora = "00:00";
                     }
                 }
             }
@@ -79,7 +78,6 @@ namespace Busticket.Controllers
             if (!ModelState.IsValid)
                 return View("Index", model);
 
-            // Marcar los asientos como ocupados en la base de datos
             var asientosDb = _context.Asientos
                 .Where(a => model.Asientos.Contains(a.Codigo) && a.RutaId == model.RutaId)
                 .ToList();
@@ -91,18 +89,15 @@ namespace Busticket.Controllers
 
             _context.SaveChanges();
 
-            // Limpiar sesión
             HttpContext.Session.Remove("Carrito");
             HttpContext.Session.Remove("Total");
 
-            // Redirigir a página de confirmación
             return RedirectToAction("ConfirmacionPago", new { rutaId = model.RutaId });
         }
 
         // GET: /Pago/ConfirmacionPago
         public IActionResult ConfirmacionPago(int rutaId)
         {
-            // Aquí puedes mostrar detalles del pago y ruta
             var ruta = _context.Rutas.FirstOrDefault(r => r.RutaId == rutaId);
             var model = new PagoViewModel();
 
@@ -114,7 +109,7 @@ namespace Busticket.Controllers
                 model.Empresa = ruta.Empresa;
                 model.Duracion = ruta.Duracion + " min";
                 model.Fecha = DateTime.Now.ToString("dd/MM/yyyy");
-                model.Hora = "00:00"; // reemplazar si tienes hora real
+                model.Hora = "00:00";
             }
 
             return View(model);

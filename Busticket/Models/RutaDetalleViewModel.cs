@@ -7,7 +7,7 @@ namespace Busticket.Models
 
         public string RequestId { get; set; }
 
-        // Agregar esto
+       
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
     }
 }

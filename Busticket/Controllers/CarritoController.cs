@@ -17,7 +17,7 @@ namespace Busticket.Controllers
             _context = context;
         }
 
-        // DTOs
+  
         public class AgregarCarritoDto
         {
             public int RutaId { get; set; }
@@ -43,7 +43,7 @@ namespace Busticket.Controllers
 
             decimal precio = ruta.Precio;
 
-            // Recuperar carrito desde sesión
+            
             var carrito = HttpContext.Session.GetObjectFromJson<List<string>>("Carrito") ?? new List<string>();
 
             foreach (var asiento in dto.Asientos)
@@ -51,7 +51,6 @@ namespace Busticket.Controllers
                 if (!carrito.Contains(asiento.Codigo))
                     carrito.Add(asiento.Codigo);
 
-                // --- Guardar en Ventas ---
                 var venta = new Venta
                 {
                     AsientoId = int.Parse(asiento.Id),
@@ -61,10 +60,9 @@ namespace Busticket.Controllers
                 _context.Ventas.Add(venta);
             }
 
-            // Guardar cambios en la DB
             await _context.SaveChangesAsync();
 
-            // Guardar carrito en sesión
+    
             HttpContext.Session.SetObjectAsJson("Carrito", carrito);
             decimal total = carrito.Count * precio;
             HttpContext.Session.SetString("Total", total.ToString());

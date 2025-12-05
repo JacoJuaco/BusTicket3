@@ -4,7 +4,7 @@ using Busticket.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
-using Busticket.Extensions; // <-- Para Get/SetObjectAsJson
+using Busticket.Extensions; 
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -50,7 +50,6 @@ namespace Busticket.Controllers
                                          {
                                              AsientoId = a.AsientoId,
                                              Codigo = a.Codigo,
-                                             // Disponible = true si no está vendido
                                              Disponible = !_context.Ventas.Any(v => v.AsientoId == a.AsientoId)
                                          })
                                          .ToListAsync();
@@ -172,16 +171,14 @@ namespace Busticket.Controllers
         [HttpPost]
         public IActionResult SeleccionarAsiento(string asientoCodigo, int precio)
         {
-            // Recuperar carrito
             var carrito = HttpContext.Session.GetObjectFromJson<List<string>>("Carrito") ?? new List<string>();
 
-            // Agregar o quitar asiento
+       
             if (carrito.Contains(asientoCodigo))
                 carrito.Remove(asientoCodigo);
             else
                 carrito.Add(asientoCodigo);
 
-            // Guardar en Session
             HttpContext.Session.SetObjectAsJson("Carrito", carrito);
             HttpContext.Session.SetInt32("Total", carrito.Count * precio);
 

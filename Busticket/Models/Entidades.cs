@@ -124,23 +124,23 @@ namespace Busticket.Models
         public int Id { get; set; }
         public string Titulo { get; set; }
         public string Descripcion { get; set; }
-        public decimal Descuento { get; set; } // porcentaje o valor
+        public decimal Descuento { get; set; } 
         public DateTime FechaInicio { get; set; }
         public DateTime FechaFin { get; set; }
     }
 
     public class Resena
     {
-        public int ResenaId { get; set; } // coincide con la tabla
+        public int ResenaId { get; set; } 
         public int UsuarioId { get; set; }
         public Usuario Usuario { get; set; }
 
         public int RutaId { get; set; }
         public Ruta Ruta { get; set; }
 
-        public int Calificacion { get; set; } // 1 a 5
+        public int Calificacion { get; set; } 
         public string Comentario { get; set; }
-        public DateTime Fecha { get; set; } = DateTime.Now; // default
+        public DateTime Fecha { get; set; } = DateTime.Now; 
     }
     public class Reporte
     {

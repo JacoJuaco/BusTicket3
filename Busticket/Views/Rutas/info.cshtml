@@ -18,26 +18,26 @@
 
 <body class="bg-gray-100">
 
-    <!-- HEADER -->
+ 
     <header class="py-6 bg-white shadow-md">
         <div class="w-[95%] max-w-[1400px] mx-auto flex items-center justify-between">
 
-            <!-- Logo -->
+         
             <div class="text-3xl font-extrabold text-[#284D67] cursor-pointer">
                 <a href="/">Busticket</a>
             </div>
 
-            <!-- Menú -->
+         
             <nav class="flex gap-12">
                 <a href="/Rutas/index" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Destinos</a>
                 <a href="#" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Planes</a>
                 <a href="#" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Descuentos</a>
             </nav>
 
-            <!-- Iconos -->
+       
             <div class="flex items-center">
 
-                <!-- Carrito con dropdown funcional -->
+          
                 <div class="relative ml-4">
                     <button id="btnCarrito" class="p-2">
                         <i class="fa fa-shopping-cart text-[#284D67] text-2xl"></i>
@@ -63,7 +63,7 @@
                     </div>
                 </div>
 
-                <!-- Icono usuario -->
+             
                 <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23284D67' viewBox='0 0 24 24'><path d='M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10 1.657-10 5v3h20v-3c0-3.343-6.686-5-10-5z'/></svg>"
                      class="w-7 ml-4 cursor-pointer">
             </div>
@@ -71,10 +71,10 @@
         </div>
     </header>
 
-    <!-- CONTENIDO DOS COLUMNAS -->
+  
     <div class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10">
 
-        <!-- IZQUIERDA - ASIENTOS -->
+       
         <div class="p-6 bg-white shadow-lg rounded-xl">
 
             <h2 class="text-2xl font-bold mb-4">Selecciona tus asientos</h2>
@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        <!-- DERECHA - INFORMACIÓN -->
+       
         <div class="p-6 bg-white shadow-lg rounded-xl">
             <h1 class="text-4xl font-bold mb-4">
                 @Model.Ruta.Origen — @Model.Ruta.Destino
@@ -197,7 +197,7 @@
               const result = await response.json();
 
               if (response.ok) {
-                // Actualizar carrito visualmente
+                
                 const listaCarrito = document.getElementById('listaCarrito');
                 const totalCarrito = document.getElementById('totalCarrito');
 
@@ -212,7 +212,7 @@
                 const total = dto.Asientos.length * precioAsiento;
                 totalCarrito.textContent = formatoCOP.format(total);
 
-                // ✅ SweetAlert2 éxito
+                
                 Swal.fire({
                   icon: 'success',
                   title: '¡Éxito!',
@@ -221,7 +221,6 @@
                   timer: 2000
                 });
 
-                // Limpiar selección visual
                 asientosSeleccionados = [];
                 document.querySelectorAll('.asiento').forEach(btn => {
                   if (!btn.hasAttribute('disabled')) {
@@ -249,7 +248,7 @@
             }
           }
 
-          // Dropdown funcional
+      
           const btnCarrito = document.getElementById('btnCarrito');
           const dropdownCarrito = document.getElementById('dropdownCarrito');
 
