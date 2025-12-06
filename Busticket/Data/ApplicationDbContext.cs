@@ -3,90 +3,109 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Busticket.Data
 {
-    public class ApplicationDbContext : DbContext
+  public class ApplicationDbContext : DbContext
+  {
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options) { }
+
+    public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<Ruta> Rutas { get; set; }
+    public DbSet<Empresa> Empresas { get; set; }
+    public DbSet<Bus> Buses { get; set; }
+    public DbSet<Conductor> Conductores { get; set; }
+    public DbSet<Itinerario> Itinerarios { get; set; }
+    public DbSet<Boleto> Boletos { get; set; }
+    public DbSet<Oferta> Ofertas { get; set; }
+    public DbSet<Resena> Reseñas { get; set; }
+    public DbSet<Reporte> Reportes { get; set; }
+    public DbSet<Asiento> Asientos { get; set; }
+    public DbSet<Venta> Ventas { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options) { }
+      // Mapear nombres de tablas
+      modelBuilder.Entity<Usuario>().ToTable("Usuario");
+      modelBuilder.Entity<Ruta>().ToTable("Ruta");
+      modelBuilder.Entity<Empresa>().ToTable("Empresa");
+      modelBuilder.Entity<Bus>().ToTable("Bus");
+      modelBuilder.Entity<Conductor>().ToTable("Conductor");
+      modelBuilder.Entity<Itinerario>().ToTable("Itinerario");
+      modelBuilder.Entity<Boleto>().ToTable("Boleto");
+      modelBuilder.Entity<Oferta>().ToTable("Oferta");
+      modelBuilder.Entity<Resena>().ToTable("Resena");
+      modelBuilder.Entity<Reporte>().ToTable("Reporte");
+      modelBuilder.Entity<Asiento>().ToTable("Asiento");
+      modelBuilder.Entity<Venta>().ToTable("Venta");
 
-        public DbSet<Usuario> Usuarios { get; set; }
-        public DbSet<Ruta> Rutas { get; set; }
-        public DbSet<Empresa> Empresas { get; set; }
-        public DbSet<Bus> Buses { get; set; }
-        public DbSet<Conductor> Conductores { get; set; }
-        public DbSet<Itinerario> Itinerarios { get; set; }
-        public DbSet<Boleto> Boletos { get; set; }
-        public DbSet<Oferta> Ofertas { get; set; }
-        public DbSet<Resena> Rese�as { get; set; }
-        public DbSet<Reporte> Reportes { get; set; }
-        public DbSet<Asiento> Asientos { get; set; }  
-        public DbSet<Venta> Ventas { get; set; }
+      // --- Relaciones ---
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Usuario>().ToTable("Usuario");
-            modelBuilder.Entity<Ruta>().ToTable("Ruta");
-            modelBuilder.Entity<Empresa>().ToTable("Empresa");
-            modelBuilder.Entity<Bus>().ToTable("Bus");
-            modelBuilder.Entity<Conductor>().ToTable("Conductor");
-            modelBuilder.Entity<Itinerario>().ToTable("Itinerario");
-            modelBuilder.Entity<Boleto>().ToTable("Boleto");
-            modelBuilder.Entity<Oferta>().ToTable("Oferta");
-            modelBuilder.Entity<Resena>().ToTable("Resena");
-            modelBuilder.Entity<Reporte>().ToTable("Reporte");
-            modelBuilder.Entity<Asiento>().ToTable("Asiento");
+      // Asiento → Ruta (1:N)
+      modelBuilder.Entity<Asiento>()
+        .HasOne(a => a.Ruta)
+        .WithMany(r => r.Asientos)
+        .HasForeignKey(a => a.RutaId)
+        .OnDelete(DeleteBehavior.Cascade);
 
-            // --- Relaciones ---
+      // Boleto → Usuario (N:1)
+      modelBuilder.Entity<Boleto>()
+          .HasOne(b => b.Usuario)
+          .WithMany()
+          .HasForeignKey(b => b.UsuarioId);
 
-    
-            modelBuilder.Entity<Asiento>()
-              .HasOne(a => a.Ruta)
-              .WithMany(r => r.Asientos)
-              .HasForeignKey(a => a.RutaId)
-              .OnDelete(DeleteBehavior.Cascade);
+      // Boleto → Itinerario (N:1)
+      modelBuilder.Entity<Boleto>()
+          .HasOne(b => b.Itinerario)
+          .WithMany()
+          .HasForeignKey(b => b.ItinerarioId);
 
-            // Boleto ? Usuario e Itinerario
-            modelBuilder.Entity<Boleto>()
-                        .HasOne(b => b.Usuario)
-                        .WithMany()
-                        .HasForeignKey(b => b.UsuarioId);
+      // Itinerario → Ruta
+      modelBuilder.Entity<Itinerario>()
+          .HasOne(i => i.Ruta)
+          .WithMany()
+          .HasForeignKey(i => i.RutaId);
 
-            modelBuilder.Entity<Boleto>()
-                        .HasOne(b => b.Itinerario)
-                        .WithMany()
-                        .HasForeignKey(b => b.ItinerarioId);
+      // Itinerario → Bus
+      modelBuilder.Entity<Itinerario>()
+          .HasOne(i => i.Bus)
+          .WithMany()
+          .HasForeignKey(i => i.BusId);
 
-            // Itinerario ? Ruta, Bus, Conductor
-            modelBuilder.Entity<Itinerario>()
-                        .HasOne(i => i.Ruta)
-                        .WithMany()
-                        .HasForeignKey(i => i.RutaId);
+      // Itinerario → Conductor
+      modelBuilder.Entity<Itinerario>()
+          .HasOne(i => i.Conductor)
+          .WithMany()
+          .HasForeignKey(i => i.ConductorId);
 
-            modelBuilder.Entity<Itinerario>()
-                        .HasOne(i => i.Bus)
-                        .WithMany()
-                        .HasForeignKey(i => i.BusId);
+      // Resena → Usuario
+      modelBuilder.Entity<Resena>()
+          .HasOne(r => r.Usuario)
+          .WithMany()
+          .HasForeignKey(r => r.UsuarioId);
 
-            modelBuilder.Entity<Itinerario>()
-                        .HasOne(i => i.Conductor)
-                        .WithMany()
-                        .HasForeignKey(i => i.ConductorId);
+      // Resena → Ruta
+      modelBuilder.Entity<Resena>()
+          .HasOne(r => r.Ruta)
+          .WithMany()
+          .HasForeignKey(r => r.RutaId);
 
-            // Resena ? Usuario y Ruta
-            modelBuilder.Entity<Resena>()
-                        .HasOne(r => r.Usuario)
-                        .WithMany()
-                        .HasForeignKey(r => r.UsuarioId);
+      // Venta → Asiento
+      modelBuilder.Entity<Venta>()
+          .HasOne<Asiento>()
+          .WithMany()
+          .HasForeignKey(v => v.AsientoId);
 
-            modelBuilder.Entity<Resena>()
-                        .HasOne(r => r.Ruta)
-                        .WithMany()
-                        .HasForeignKey(r => r.RutaId);
+      // Venta → Ruta
+      modelBuilder.Entity<Venta>()
+      .HasOne<Ruta>()
+      .WithMany()
+      .HasForeignKey(v => v.RutaId)
+      .OnDelete(DeleteBehavior.Restrict);
 
-            // Reporte ? Usuario
-            modelBuilder.Entity<Reporte>()
-                        .HasOne(r => r.Usuario)
-                        .WithMany()
-                        .HasForeignKey(r => r.UsuarioId);
-        }
+      modelBuilder.Entity<Venta>()
+            .HasOne<Asiento>()
+            .WithMany()
+            .HasForeignKey(v => v.AsientoId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
+  }
 }

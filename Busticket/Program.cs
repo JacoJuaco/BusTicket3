@@ -1,5 +1,4 @@
-﻿using Busticket.Data;
-using Busticket.Services;
+using Busticket.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,9 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
-
-// 🔹 Registro de servicios
-builder.Services.AddSingleton<CloudinaryService>();
 
 // 🔹 MVC
 builder.Services.AddControllersWithViews();

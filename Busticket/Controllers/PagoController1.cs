@@ -1,4 +1,4 @@
-﻿using Busticket.Data;
+using Busticket.Data;
 using Busticket.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -47,7 +47,7 @@ namespace Busticket.Controllers
                         origen = ruta.Origen;
                         destino = ruta.Destino;
                         empresa = ruta.Empresa;
-                        duracion = ruta.Duracion + " min";
+                        duracion = ruta.DuracionMin + " min";
                         fecha = DateTime.Now.ToString("dd/MM/yyyy");
                         hora = "00:00";
                     }
@@ -107,7 +107,7 @@ namespace Busticket.Controllers
                 model.Origen = ruta.Origen;
                 model.Destino = ruta.Destino;
                 model.Empresa = ruta.Empresa;
-                model.Duracion = ruta.Duracion + " min";
+                model.Duracion = ruta.DuracionMin + " min";
                 model.Fecha = DateTime.Now.ToString("dd/MM/yyyy");
                 model.Hora = "00:00";
             }

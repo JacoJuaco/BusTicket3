@@ -1,6 +1,5 @@
-﻿using Busticket.Data;
+using Busticket.Data;
 using Busticket.Models;
-using Busticket.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
@@ -15,12 +14,10 @@ namespace Busticket.Controllers
     public class RutasController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly CloudinaryService _cloudinary;
 
-        public RutasController(ApplicationDbContext context, CloudinaryService cloudinary)
+        public RutasController(ApplicationDbContext context)
         {
             _context = context;
-            _cloudinary = cloudinary;
         }
 
         // GET: /Rutas
@@ -74,9 +71,9 @@ namespace Busticket.Controllers
         {
             if (!ModelState.IsValid) return View(ruta);
 
-            if (imagen != null && imagen.Length > 0)
+           /* if (imagen != null && imagen.Length > 0)
                 ruta.ImagenUrl = await _cloudinary.SubirImagenAsync(imagen);
-
+           */
             _context.Rutas.Add(ruta);
             await _context.SaveChangesAsync();
 
@@ -103,12 +100,12 @@ namespace Busticket.Controllers
             var rutaExistente = await _context.Rutas.AsNoTracking()
                                                     .FirstOrDefaultAsync(r => r.RutaId == id);
             if (rutaExistente == null) return NotFound();
-
+            /*
             if (imagen != null && imagen.Length > 0)
                 ruta.ImagenUrl = await _cloudinary.SubirImagenAsync(imagen);
             else
                 ruta.ImagenUrl = rutaExistente.ImagenUrl;
-
+            */
             _context.Update(ruta);
             await _context.SaveChangesAsync();
 
@@ -142,31 +139,7 @@ namespace Busticket.Controllers
         // GET: /Rutas/SubirImagen
         public IActionResult SubirImagen() => View();
 
-        // POST: /Rutas/SubirImagen
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubirImagen(IFormFile imagen)
-        {
-            if (imagen == null || imagen.Length == 0)
-            {
-                TempData["Error"] = "Debes seleccionar una imagen.";
-                return View();
-            }
-
-            try
-            {
-                var url = await _cloudinary.SubirImagenAsync(imagen);
-                TempData["Success"] = "Imagen subida correctamente!";
-                TempData["ImagenUrl"] = url;
-                return RedirectToAction("SubirImagen");
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = $"Error al subir la imagen: {ex.Message}";
-                return View();
-            }
-        }
-
+        
         // POST: /Rutas/SeleccionarAsiento
         [HttpPost]
         public IActionResult SeleccionarAsiento(string asientoCodigo, int precio)
