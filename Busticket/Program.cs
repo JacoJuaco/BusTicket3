@@ -1,17 +1,30 @@
 using Busticket.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🔹 Conexión a SQL Server
+// ----------------------------------------------------
+// Servicios
+// ----------------------------------------------------
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// 🔹 MVC
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
 builder.Services.AddControllersWithViews();
 
-// 🔹 Sesión
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -21,17 +34,20 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// ----------------------------------------------------------------------
-// 🔹 Manejo de errores personalizados (404 y 500)
-// ----------------------------------------------------------------------
-if (!app.Environment.IsDevelopment())
+// ----------------------------------------------------
+// Middleware de errores ✅ CORRECTO
+// ----------------------------------------------------
+
+if (app.Environment.IsDevelopment())
 {
-    // Error 500
-    app.UseExceptionHandler("/Error/ServerError");
-
-    // Error 404 y otros códigos
+    // ✅ Solo en desarrollo
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    // ✅ Solo en producción
+    app.UseExceptionHandler("/Error/Error500");
     app.UseStatusCodePagesWithReExecute("/Error/HttpStatus", "?code={0}");
-
     app.UseHsts();
 }
 
@@ -40,15 +56,26 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 🔹 Habilitar sesión ANTES de Authorization
 app.UseSession();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
-// 🔹 Ruta por defecto → Auth/Login
+// ----------------------------------------------------
+// Rutas
+// ----------------------------------------------------
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}"
 );
+
+// ----------------------------------------------------
+// Seed
+// ----------------------------------------------------
+using (var scope = app.Services.CreateScope())
+{
+    await IdentitySeeder.SeedRolesAndAdmin(scope.ServiceProvider);
+}
 
 app.Run();

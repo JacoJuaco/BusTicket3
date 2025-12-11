@@ -74,52 +74,56 @@
   
     <div class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10">
 
-       
+        <!-- COLUMNA IZQUIERDA -->
         <div class="p-6 bg-white shadow-lg rounded-xl">
 
             <h2 class="text-2xl font-bold mb-4">Selecciona tus asientos</h2>
 
             <div class="flex justify-center mb-6">
-                <img src="@Model.Ruta.ImagenUrl"
-                     class="w-72 rounded-lg shadow-md"
-                     alt="Bus" />
+                <img src="@(string.IsNullOrEmpty(Model.Ruta.ImagenUrl)
+                                          ? "/img/bus-default.png"
+                                          : Model.Ruta.ImagenUrl)">
             </div>
 
             <div class="grid grid-cols-4 gap-4 justify-items-center">
                 @foreach (var asiento in Model.Asientos)
                 {
-                    bool esPasillo = asiento.Codigo.EndsWith("3");
+                    bool esPasillo = asiento.Numero % 4 == 3;
                     if (esPasillo)
                     {
                         <div class="w-10"></div>
                     }
-                    <button class="asiento w-12 h-12 rounded-lg text-sm font-bold flex items-center justify-center transition-all
-                   @(asiento.Disponible ? "bg-green-500 hover:bg-green-600 text-white" : "bg-gray-400 text-white cursor-not-allowed")"
+
+                    <button class="asiento w-12 h-12 rounded-lg text-sm font-bold flex items-center justify-center
+                        @(asiento.Disponible ? "bg-green-500 hover:bg-green-600" : "bg-gray-400 cursor-not-allowed") text-white"
                             data-id="@asiento.AsientoId"
-                            data-codigo="@asiento.Codigo"
+                            data-codigo="@asiento.Numero"
                             @(asiento.Disponible ? "" : "disabled")>
-                        @asiento.Codigo
+                        @asiento.Numero
                     </button>
                 }
-
-                }
             </div>
+
         </div>
 
-       
+        <!-- COLUMNA DERECHA -->
         <div class="p-6 bg-white shadow-lg rounded-xl">
-            <h1 class="text-4xl font-bold mb-4">
-                @Model.Ruta.Origen — @Model.Ruta.Destino
+
+            <h1 class="text-3xl font-bold mb-4">
+                @Model.Ruta.CiudadOrigen.Nombre —
+                @Model.Ruta.CiudadDestino.Nombre
             </h1>
 
             <div class="space-y-2 text-gray-700">
-                <p>🚍 <span class="font-semibold">Empresa:</span> @Model.Ruta.Empresa</p>
-                <p>⏱ <span class="font-semibold">Duración:</span> @Model.Ruta.DuracionMin min</p>
-                <p>💵 <span class="font-semibold">Precio por asiento:</span> @Model.Ruta.Precio.ToString("N0") COP</p>
+                <p>🚍 <b>Empresa:</b> @Model.Ruta.Empresa.Nombre</p>
+                <p>⏱ <b>Duración:</b> @Model.Ruta.DuracionMin min</p>
+                <p>💵 <b>Precio por asiento:</b> @Model.Ruta.Precio.ToString("N0") COP</p>
             </div>
 
-            <h2 class="text-2xl font-bold mt-10">🧾 Resumen de compra</h2>
-            <p class="text-lg text-gray-700 mt-2">Total: <span id="total">0</span> COP</p>
+            <h2 class="text-2xl font-bold mt-8">🧾 Resumen de compra</h2>
+            <p class="text-lg mt-2">
+                Total: <span id="total">0</span> COP
+            </p>
 
             <div class="mt-6">
                 @Html.AntiForgeryToken()
@@ -128,9 +132,11 @@
                     Agregar al carrito
                 </button>
             </div>
+
         </div>
 
     </div>
+
 
     <!-- SCRIPT -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

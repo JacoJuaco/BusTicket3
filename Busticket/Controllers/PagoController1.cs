@@ -35,24 +35,40 @@ namespace Busticket.Controllers
 
             if (asientos.Count > 0)
             {
-                var primerAsiento = _context.Asientos.FirstOrDefault(a => a.Codigo == asientos[0]);
-
-                if (primerAsiento != null)
+                // Convertir el primer asiento de string a int
+                if (int.TryParse(asientos[0], out int numeroAsiento))
                 {
-                    var ruta = _context.Rutas.FirstOrDefault(r => r.RutaId == primerAsiento.RutaId);
+                    var primerAsiento = _context.Asiento
+                        .FirstOrDefault(a => a.Numero == numeroAsiento);
 
-                    if (ruta != null)
+                    if (primerAsiento != null)
                     {
-                        rutaId = ruta.RutaId;
-                        origen = ruta.Origen;
-                        destino = ruta.Destino;
-                        empresa = ruta.Empresa;
-                        duracion = ruta.DuracionMin + " min";
-                        fecha = DateTime.Now.ToString("dd/MM/yyyy");
-                        hora = "00:00";
+                        var ruta = _context.Ruta
+                            .Where(r => r.RutaId == primerAsiento.RutaId)
+                            .Select(r => new
+                            {
+                                r.RutaId,
+                                Origen = r.CiudadOrigen.Nombre,
+                                Destino = r.CiudadDestino.Nombre,
+                                Empresa = r.Empresa.Nombre,
+                                r.DuracionMin
+                            })
+                            .FirstOrDefault();
+
+                        if (ruta != null)
+                        {
+                            rutaId = ruta.RutaId;
+                            origen = ruta.Origen;
+                            destino = ruta.Destino;
+                            empresa = ruta.Empresa;
+                            duracion = ruta.DuracionMin + " min";
+                            fecha = DateTime.Now.ToString("dd/MM/yyyy");
+                            hora = "00:00";
+                        }
                     }
                 }
             }
+
 
             var model = new PagoViewModel
             {
@@ -78,8 +94,14 @@ namespace Busticket.Controllers
             if (!ModelState.IsValid)
                 return View("Index", model);
 
-            var asientosDb = _context.Asientos
-                .Where(a => model.Asientos.Contains(a.Codigo) && a.RutaId == model.RutaId)
+            // Convertir los asientos de string a int
+            var asientosInt = model.Asientos
+                .Select(s => int.TryParse(s, out var n) ? n : -1)
+                .Where(n => n != -1)
+                .ToList();
+
+            var asientosDb = _context.Asiento
+                .Where(a => asientosInt.Contains(a.Numero) && a.RutaId == model.RutaId)
                 .ToList();
 
             foreach (var asiento in asientosDb)
@@ -95,10 +117,22 @@ namespace Busticket.Controllers
             return RedirectToAction("ConfirmacionPago", new { rutaId = model.RutaId });
         }
 
+
         // GET: /Pago/ConfirmacionPago
         public IActionResult ConfirmacionPago(int rutaId)
         {
-            var ruta = _context.Rutas.FirstOrDefault(r => r.RutaId == rutaId);
+            var ruta = _context.Ruta
+                .Where(r => r.RutaId == rutaId)
+                .Select(r => new
+                {
+                    r.RutaId,
+                    Origen = r.CiudadOrigen.Nombre,
+                    Destino = r.CiudadDestino.Nombre,
+                    Empresa = r.Empresa.Nombre,
+                    r.DuracionMin
+                })
+                .FirstOrDefault();
+
             var model = new PagoViewModel();
 
             if (ruta != null)

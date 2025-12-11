@@ -37,7 +37,7 @@ namespace Busticket.Controllers
             if (dto == null || dto.Asientos == null || !dto.Asientos.Any())
                 return BadRequest(new { mensaje = "No hay asientos seleccionados." });
 
-            var ruta = _context.Rutas.FirstOrDefault(r => r.RutaId == dto.RutaId);
+            var ruta = _context.Ruta.FirstOrDefault(r => r.RutaId == dto.RutaId);
             if (ruta == null)
                 return BadRequest(new { mensaje = "Ruta no encontrada." });
 
@@ -57,7 +57,7 @@ namespace Busticket.Controllers
                     RutaId = dto.RutaId,
                     Fecha = DateTime.Now
                 };
-                _context.Ventas.Add(venta);
+                _context.Venta.Add(venta);
             }
 
             await _context.SaveChangesAsync();

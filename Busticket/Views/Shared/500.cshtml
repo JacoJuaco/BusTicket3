@@ -1,12 +1,59 @@
 ﻿@{
-    ViewData["Title"] = "Error interno del servidor";
+    ViewBag.Title = "Error interno del servidor";
+    Layout = null;
 }
 
-<div class="text-center mt-20">
-    <h1 class="text-5xl font-bold text-red-600">500</h1>
-    <p class="text-xl mt-4">Ocurrió un error inesperado.</p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>500 - Error interno del servidor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    <a href="/" class="mt-6 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg">
-        Volver al inicio
-    </a>
-</div>
+    <style>
+        /* Degradado suave superior e inferior */
+        .overlay-gradient {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.85), rgba(0,0,0,0.35), rgba(0,0,0,0.85));
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen bg-black text-white flex items-center justify-center">
+
+    <div class="relative w-full h-full overflow-hidden">
+
+        <!-- Imagen de fondo -->
+        <div class="absolute inset-0 bg-cover bg-center"
+             style="background-image: url('https://res.cloudinary.com/dbt58u6ag/image/upload/v1765306877/Gemini_Generated_Image_r2frzvr2frzvr2fr_mgvq1i.png');">
+        </div>
+
+        <!-- Overlay degradado -->
+        <div class="absolute inset-0 overlay-gradient backdrop-brightness-50"></div>
+
+        <!-- Contenido -->
+        <div class="relative z-10 flex flex-col items-center justify-center h-full max-w-3xl mx-auto px-6">
+
+            <p class="text-gray-300 tracking-widest mb-3 text-sm md:text-base">
+                500
+            </p>
+
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-lg">
+                Error interno del servidor
+            </h1>
+
+            <p class="text-gray-300 text-lg md:text-xl mb-8 leading-relaxed drop-shadow-md text-center">
+                Algo salió mal en el servidor. Estamos trabajando para solucionarlo.<br />
+                Por favor, intenta nuevamente en unos momentos.
+            </p>
+
+            <a href="/"
+               class="px-8 py-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30
+                      transition-all duration-300 text-white font-semibold shadow-lg">
+                ← Volver a inicio
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>

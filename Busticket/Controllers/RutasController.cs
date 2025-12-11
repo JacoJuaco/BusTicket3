@@ -3,7 +3,7 @@ using Busticket.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
-using Busticket.Extensions; 
+using Busticket.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,33 +23,42 @@ namespace Busticket.Controllers
         // GET: /Rutas
         public async Task<IActionResult> Index(string origen, string destino)
         {
-            var rutas = _context.Rutas.AsQueryable();
+            var rutas = _context.Ruta
+                .Include(r => r.CiudadOrigen)
+                .Include(r => r.CiudadDestino)
+                .Include(r => r.Empresa)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(origen))
-                rutas = rutas.Where(r => r.Origen.Contains(origen));
+                rutas = rutas.Where(r => r.CiudadOrigen.Nombre.Contains(origen));
 
             if (!string.IsNullOrEmpty(destino))
-                rutas = rutas.Where(r => r.Destino.Contains(destino));
+                rutas = rutas.Where(r => r.CiudadDestino.Nombre.Contains(destino));
 
             return View(await rutas.ToListAsync());
         }
 
-        // GET: /Rutas/Details/5
+        // GET: /Rutas/Info/5
         public async Task<IActionResult> Info(int id)
         {
-            var ruta = await _context.Rutas.FirstOrDefaultAsync(r => r.RutaId == id);
+            var ruta = await _context.Ruta
+                .Include(r => r.CiudadOrigen)
+                .Include(r => r.CiudadDestino)
+                .Include(r => r.Empresa)
+                .FirstOrDefaultAsync(r => r.RutaId == id);
+
             if (ruta == null) return NotFound();
 
             // Traer los asientos y marcar los vendidos
-            var asientos = await _context.Asientos
-                                         .Where(a => a.RutaId == id)
-                                         .Select(a => new Asiento
-                                         {
-                                             AsientoId = a.AsientoId,
-                                             Codigo = a.Codigo,
-                                             Disponible = !_context.Ventas.Any(v => v.AsientoId == a.AsientoId)
-                                         })
-                                         .ToListAsync();
+            var asientos = await _context.Asiento
+                .Where(a => a.RutaId == id)
+                .Select(a => new Asiento
+                {
+                    AsientoId = a.AsientoId,
+                    Numero = a.Numero,
+                    Disponible = !_context.Venta.Any(v => v.AsientoId == a.AsientoId)
+                })
+                .ToListAsync();
 
             var vm = new RutaDetalleViewModel
             {
@@ -60,31 +69,16 @@ namespace Busticket.Controllers
             return View(vm);
         }
 
-
-        // GET: /Rutas/Create
-        public IActionResult Create() => View();
-
-        // POST: /Rutas/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Ruta ruta, IFormFile imagen)
-        {
-            if (!ModelState.IsValid) return View(ruta);
-
-           /* if (imagen != null && imagen.Length > 0)
-                ruta.ImagenUrl = await _cloudinary.SubirImagenAsync(imagen);
-           */
-            _context.Rutas.Add(ruta);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
+        
 
         // GET: /Rutas/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            var ruta = await _context.Rutas.FindAsync(id);
+            var ruta = await _context.Ruta.FindAsync(id);
             if (ruta == null) return NotFound();
+
+            ViewBag.Ciudades = _context.Ciudad.ToList();
+            ViewBag.Empresas = _context.Empresa.ToList();
 
             return View(ruta);
         }
@@ -95,17 +89,24 @@ namespace Busticket.Controllers
         public async Task<IActionResult> Edit(int id, Ruta ruta, IFormFile imagen)
         {
             if (id != ruta.RutaId) return BadRequest();
-            if (!ModelState.IsValid) return View(ruta);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Ciudades = _context.Ciudad.ToList();
+                ViewBag.Empresas = _context.Empresa.ToList();
+                return View(ruta);
+            }
 
-            var rutaExistente = await _context.Rutas.AsNoTracking()
-                                                    .FirstOrDefaultAsync(r => r.RutaId == id);
+            var rutaExistente = await _context.Ruta.AsNoTracking()
+                .FirstOrDefaultAsync(r => r.RutaId == id);
             if (rutaExistente == null) return NotFound();
+
             /*
             if (imagen != null && imagen.Length > 0)
                 ruta.ImagenUrl = await _cloudinary.SubirImagenAsync(imagen);
             else
                 ruta.ImagenUrl = rutaExistente.ImagenUrl;
             */
+
             _context.Update(ruta);
             await _context.SaveChangesAsync();
 
@@ -115,7 +116,11 @@ namespace Busticket.Controllers
         // GET: /Rutas/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            var ruta = await _context.Rutas.FirstOrDefaultAsync(r => r.RutaId == id);
+            var ruta = await _context.Ruta
+                .Include(r => r.CiudadOrigen)
+                .Include(r => r.CiudadDestino)
+                .FirstOrDefaultAsync(r => r.RutaId == id);
+
             if (ruta == null) return NotFound();
 
             return View(ruta);
@@ -126,27 +131,22 @@ namespace Busticket.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var ruta = await _context.Rutas.FindAsync(id);
+            var ruta = await _context.Ruta.FindAsync(id);
             if (ruta != null)
             {
-                _context.Rutas.Remove(ruta);
+                _context.Ruta.Remove(ruta);
                 await _context.SaveChangesAsync();
             }
 
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Rutas/SubirImagen
-        public IActionResult SubirImagen() => View();
-
-        
         // POST: /Rutas/SeleccionarAsiento
         [HttpPost]
         public IActionResult SeleccionarAsiento(string asientoCodigo, int precio)
         {
             var carrito = HttpContext.Session.GetObjectFromJson<List<string>>("Carrito") ?? new List<string>();
 
-       
             if (carrito.Contains(asientoCodigo))
                 carrito.Remove(asientoCodigo);
             else
