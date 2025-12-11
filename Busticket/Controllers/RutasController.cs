@@ -60,7 +60,7 @@ namespace Busticket.Controllers
                 })
                 .ToListAsync();
 
-            var vm = new RutaDetalleViewModel
+            var vm = new ReporteVentaVM
             {
                 Ruta = ruta,
                 Asientos = asientos

@@ -35,17 +35,17 @@ builder.Services.AddSession(options =>
 var app = builder.Build();
 
 // ----------------------------------------------------
-// Middleware de errores ✅ CORRECTO
+// Middleware de errores
 // ----------------------------------------------------
 
 if (app.Environment.IsDevelopment())
 {
-    // ✅ Solo en desarrollo
+    // Solo en desarrollo
     app.UseDeveloperExceptionPage();
 }
 else
 {
-    // ✅ Solo en producción
+    // Solo en producción
     app.UseExceptionHandler("/Error/Error500");
     app.UseStatusCodePagesWithReExecute("/Error/HttpStatus", "?code={0}");
     app.UseHsts();
@@ -73,6 +73,7 @@ app.MapControllerRoute(
 // ----------------------------------------------------
 // Seed
 // ----------------------------------------------------
+
 using (var scope = app.Services.CreateScope())
 {
     await IdentitySeeder.SeedRolesAndAdmin(scope.ServiceProvider);

@@ -1,5 +1,6 @@
 ﻿using Busticket.Data;
 using Busticket.Models;
+using Busticket.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,13 +18,30 @@ namespace Busticket.Controllers
         }
 
         // PANEL ADMIN
-        public IActionResult Index()
-        {
-            return View();
-        }
 
-        // LISTAR RUTAS
-        public async Task<IActionResult> Rutas()
+        public async Task<IActionResult> Index()
+    {
+        var reporte = await _context.Venta
+            .Include(v => v.User)        // propiedad correcta
+            .Include(v => v.Empresa)
+            .Include(v => v.Ruta)        // opcional
+            .ToListAsync();
+
+        var vm = reporte.Select(v => new ReporteVentaVM1
+        {
+            VentaId = v.VentaId,
+            Usuario = v.User.UserName,
+            Empresa = v.Empresa.Nombre,
+            Fecha = v.Fecha
+
+        }).ToList();
+
+        return View(vm);
+    }
+
+
+    // LISTAR RUTAS
+    public async Task<IActionResult> Rutas()
         {
             var rutas = await _context.Ruta
                 .Include(r => r.Empresa)
@@ -34,22 +52,21 @@ namespace Busticket.Controllers
             return View(rutas);
         }
 
-        // -----------------------------------------------------------
-        // METODO AUXILIAR PARA CARGAR SELECTS
+        // MÉTODO AUXILIAR PARA SELECTS
         private void CargarViewBags()
         {
             ViewBag.Ciudades = _context.Ciudad.ToList();
             ViewBag.Empresas = _context.Empresa.ToList();
         }
 
-        // CREAR RUTA GET
+        // CREAR RUTA (GET)
         public IActionResult CrearRuta()
         {
             CargarViewBags();
             return View(new Ruta());
         }
 
-        // CREAR RUTA POST
+        // CREAR RUTA (POST)
         [HttpPost]
         public IActionResult CrearRuta(Ruta ruta)
         {
@@ -57,7 +74,6 @@ namespace Busticket.Controllers
             {
                 CargarViewBags();
 
-                // Mostrar errores en TempData
                 var errores = ModelState.Values.SelectMany(v => v.Errors)
                                                .Select(e => e.ErrorMessage)
                                                .ToList();
@@ -73,6 +89,7 @@ namespace Busticket.Controllers
             var asientos = Enumerable.Range(1, 20)
                                      .Select(i => new Asiento { Numero = i, RutaId = ruta.RutaId })
                                      .ToList();
+
             _context.Asiento.AddRange(asientos);
             _context.SaveChanges();
 
@@ -80,7 +97,7 @@ namespace Busticket.Controllers
             return RedirectToAction("Rutas");
         }
 
-        // EDITAR RUTA GET
+        // EDITAR RUTA (GET)
         public async Task<IActionResult> EditarRuta(int id)
         {
             var ruta = await _context.Ruta.FindAsync(id);
@@ -90,7 +107,7 @@ namespace Busticket.Controllers
             return View(ruta);
         }
 
-        // EDITAR RUTA POST
+        // EDITAR RUTA (POST)
         [HttpPost]
         public async Task<IActionResult> EditarRuta(Ruta ruta)
         {
@@ -113,7 +130,7 @@ namespace Busticket.Controllers
             return RedirectToAction("Rutas");
         }
 
-        // ELIMINAR RUTA GET
+        // ELIMINAR RUTA (GET)
         public async Task<IActionResult> EliminarRuta(int id)
         {
             var ruta = await _context.Ruta
@@ -127,7 +144,7 @@ namespace Busticket.Controllers
             return View(ruta);
         }
 
-        // ELIMINAR RUTA POST
+        // ELIMINAR RUTA (POST)
         [HttpPost, ActionName("EliminarRuta")]
         public async Task<IActionResult> EliminarRutaConfirmado(int id)
         {

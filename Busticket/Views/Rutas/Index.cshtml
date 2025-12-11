@@ -1,110 +1,147 @@
 @model List<Busticket.Models.Ruta>
 
 @{
-    ViewBag.Title = "Busticket";
+    ViewBag.Title = "Rutas";
     Layout = null;
 }
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Busticket</title>
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-
-    <style>
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
 </head>
 
-<body class="font-inter bg-white text-gray-700">
+<body class="bg-gray-100">
 
-    <header class="py-6">
-        <div class="w-[95%] max-w-[1400px] mx-auto flex items-center justify-between">
+    <!-- HEADER -->
+    <header class="py-6 bg-white shadow-sm">
+        <div class="max-w-[1300px] mx-auto flex items-center justify-between">
 
-            <div class="text-3xl font-extrabold text-[#284D67] cursor-pointer">
+            <div class="text-3xl font-extrabold text-[#284D67]">
                 <a href="/Home/Index">Busticket</a>
             </div>
 
-            @if (User.IsInRole("Admin"))
-            {
-                <li>
-                    <a href="/Admin/Index" class="text-blue-600 font-bold">Panel Admin</a>
-                </li>
-            }
-
             <nav class="flex gap-12">
-                <a href="/Itinerarios/Index" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Destinos</a>
 
                 <a href="/Planes/Index" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Planes</a>
 
                 <a href="/Descuentos/Index" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Descuentos</a>
             </nav>
 
-
-
-            <div class="flex items-center">
-
-
-                <a href="/sapo">
-                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23284D67' viewBox='0 0 24 24'><path d='M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10 1.657-10 5v3h20v-3c0-3.343-6.686-5-10-5z'/></svg>"
-                         class="w-7 ml-4 cursor-pointer">
-                </a>
+            <div>
+                <img src="data:image/svg+xml;utf8,
+                <svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23284D67'
+                     viewBox='0 0 24 24'>
+                    <path d='M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5
+                    2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10
+                    1.657-10 5v3h20v-3c0-3.343-6.686-5-10-5z' />
+                </svg>"
+                class="w-7 cursor-pointer">
             </div>
-
         </div>
     </header>
 
-    <form method="get" action="@Url.Action("Index", "Rutas")"
-          class="w-[90%] mx-auto bg-[#002f5e] text-white rounded-full px-8 py-4 flex items-center justify-between mt-4">
+    <!-- 📌 CONTENEDOR PRINCIPAL (FILTROS + RUTAS + MAPA) -->
+    <div class="flex max-w-[1300px] mx-auto mt-6 gap-10">
 
-        <div class="flex flex-col text-center">
-            <label class="text-xs opacity-80">Desde</label>
-            <input type="text" name="origen" value="@ViewData["origen"]"
-                   placeholder="Ciudad…" class="bg-transparent outline-none text-sm text-center placeholder-gray-300" />
-        </div>
+        <!-- 🔵 SIDEBAR (FILTROS) -->
+        <aside class="w-80 bg-white shadow rounded-xl p-6 h-fit sticky top-4">
 
-        <div class="w-[1px] h-10 bg-white opacity-20"></div>
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <i class="fa fa-filter text-[#284D67]"></i> Filtros
+            </h2>
 
-        <div class="flex flex-col text-center">
-            <label class="text-xs opacity-80">Hasta</label>
-            <input type="text" name="destino" value="@ViewData["destino"]"
-                   placeholder="Ciudad…" class="bg-transparent outline-none text-sm text-center placeholder-gray-300" />
-        </div>
+            <form method="get" action="/Rutas/Index" class="space-y-5">
 
-        <button type="submit" class="bg-white text-[#002f5e] rounded-full p-3 hover:bg-gray-200 transition flex items-center justify-center">
-            🔍
-        </button>
+                <!-- ORIGEN -->
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">Desde</label>
+                    <select name="origen" class="mt-1 w-full border rounded-lg px-3 py-2">
+                        <option value="">Todas</option>
+                        @foreach (var c in Model.Select(m => m.CiudadOrigen).Distinct())
+                        {
+                            <option value="@c.Nombre">@c.Nombre</option>
+                        }
+                    </select>
+                </div>
 
-    </form>
+                <!-- DESTINO -->
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">Hasta</label>
+                    <select name="destino" class="mt-1 w-full border rounded-lg px-3 py-2">
+                        <option value="">Todas</option>
+                        @foreach (var c in Model.Select(m => m.CiudadDestino).Distinct())
+                        {
+                            <option value="@c.Nombre">@c.Nombre</option>
+                        }
+                    </select>
+                </div>
 
-    <div class="flex h-[calc(100vh-220px)] gap-4">
+                <!-- EMPRESA -->
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">Empresa</label>
+                    <select name="empresa" class="mt-1 w-full border rounded-lg px-3 py-2">
+                        <option value="">Todas</option>
+                        @foreach (var e in Model.Select(m => m.Empresa).Distinct())
+                        {
+                            <option value="@e.Nombre">@e.Nombre</option>
+                        }
+                    </select>
+                </div>
 
-        <div class="w-1/2 p-4 overflow-y-auto scrollbar-hide bg-white">
-            <h3 class="text-xl font-semibold mb-4">@Model.Count rutas encontradas</h3>
+                <!-- PRECIO -->
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">Rango de precio</label>
+                    <select name="precio" class="mt-1 w-full border rounded-lg px-3 py-2">
+                        <option value="">Todos</option>
+                        <option value="1">0 - 30.000</option>
+                        <option value="2">30.000 - 60.000</option>
+                        <option value="3">60.000 - 100.000</option>
+                        <option value="4">Más de 100.000</option>
+                    </select>
+                </div>
+
+                <!-- DURACIÓN -->
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">Duración</label>
+                    <select name="duracion" class="mt-1 w-full border rounded-lg px-3 py-2">
+                        <option value="">Todas</option>
+                        <option value="1">0 - 60 min</option>
+                        <option value="2">60 - 120 min</option>
+                        <option value="3">120 - 240 min</option>
+                        <option value="4">Más de 240 min</option>
+                    </select>
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-[#284D67] text-white py-2 rounded-lg hover:bg-[#1f3a4d]">
+                    Aplicar filtros
+                </button>
+
+            </form>
+        </aside>
+
+        <!-- 🔵 LISTADO DE RUTAS -->
+        <div class="w-[55%] bg-white rounded-xl shadow p-4 h-[85vh] overflow-y-auto">
+
+            <h3 class="text-xl font-bold mb-4">@Model.Count rutas encontradas</h3>
 
             <div id="rutasContainer" class="flex flex-col gap-4">
+
                 @foreach (var ruta in Model)
                 {
-                    <div class="ruta-card flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer"
+                    <div class="ruta-card flex items-center justify-between p-4 bg-white
+                                    rounded-xl border border-gray-200 shadow-sm hover:shadow-md
+                                    transition cursor-pointer"
                          data-origen-lat="@ruta.CiudadOrigen.Lat"
-                         data-origen-lng="@ruta.CiudadOrigen.Lat"
-                         data-destino-lat="@ruta.CiudadDestino.Lng"
+                         data-origen-lng="@ruta.CiudadOrigen.Lng"
+                         data-destino-lat="@ruta.CiudadDestino.Lat"
                          data-destino-lng="@ruta.CiudadDestino.Lng"
                          data-id="@ruta.RutaId">
 
@@ -117,7 +154,6 @@
                             </p>
 
                             <p class="text-sm text-gray-500">Empresa: @ruta.Empresa.Nombre</p>
-                            <p class="text-sm text-gray-500">Tipo: Bus intermunicipal de larga distancia</p>
                             <p class="text-sm text-gray-500">Duración: @ruta.DuracionMin min</p>
 
                             <div class="flex items-center gap-1 mt-1">
@@ -127,7 +163,6 @@
                         </div>
 
                         <div class="flex flex-col items-end">
-                            <button class="fav-btn text-gray-400 hover:text-red-500 text-2xl transition">♡</button>
                             <p class="font-bold text-blue-900 mt-4">
                                 $@ruta.Precio.ToString("N0") COP
                             </p>
@@ -138,68 +173,47 @@
             </div>
         </div>
 
-        <div class="w-1/2 h-full pt-8">
-            <div id="map" class="w-full h-full rounded-xl shadow-lg"></div>
+        <!-- 🔵 MAPA A LA DERECHA -->
+        <div class="w-[330px] flex justify-center items-start pt-4">
+            <div id="map" class="w-[330px] h-[330px] rounded-xl shadow"></div>
         </div>
 
     </div>
 
+    <!-- JS DEL MAPA -->
     <script>
-        var map = L.map('map').setView([10.9685, -74.7813], 7);
+        var map = L.map('map').setView([10.97, -74.78], 7);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         var routingControl = null;
 
-        document.querySelectorAll('.ruta-card').forEach(function (card) {
-            card.addEventListener('mouseenter', function () {
-                var origenLat = parseFloat(card.dataset.origenLat);
-                var origenLng = parseFloat(card.dataset.origenLng);
-                var destinoLat = parseFloat(card.dataset.destinoLat);
-                var destinoLng = parseFloat(card.dataset.destinoLng);
+        document.querySelectorAll('.ruta-card').forEach(card => {
 
-                if (routingControl) {
-                    map.removeControl(routingControl);
-                }
+            card.addEventListener('mouseenter', () => {
+
+                var oLat = parseFloat(card.dataset.origenLat);
+                var oLng = parseFloat(card.dataset.origenLng);
+                var dLat = parseFloat(card.dataset.destinoLat);
+                var dLng = parseFloat(card.dataset.destinoLng);
+
+                if (routingControl) map.removeControl(routingControl);
 
                 routingControl = L.Routing.control({
-                    waypoints: [
-                        L.latLng(origenLat, origenLng),
-                        L.latLng(destinoLat, destinoLng)
-                    ],
-                    lineOptions: {
-                        styles: [{ color: '#00335c', weight: 5 }]
-                    },
+                    waypoints: [L.latLng(oLat, oLng), L.latLng(dLat, dLng)],
+                    lineOptions: { styles: [{ color: '#00335c', weight: 4 }] },
                     addWaypoints: false,
                     draggableWaypoints: false,
                     show: false
                 }).addTo(map);
 
-                map.fitBounds([
-                    [origenLat, origenLng],
-                    [destinoLat, destinoLng]
-                ]);
+                map.fitBounds([[oLat, oLng], [dLat, dLng]]);
             });
 
-            card.addEventListener('click', function () {
-                var rutaId = card.dataset.id;
-                window.location.href = '/Rutas/info/' + rutaId;
+            card.addEventListener('click', () => {
+                window.location.href = '/Rutas/info/' + card.dataset.id;
             });
-        });
 
-        document.querySelectorAll('.fav-btn').forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                if (btn.textContent === "♡") {
-                    btn.textContent = "❤";
-                    btn.classList.add("text-red-500");
-                } else {
-                    btn.textContent = "♡";
-                    btn.classList.remove("text-red-500");
-                }
-            });
         });
     </script>
 

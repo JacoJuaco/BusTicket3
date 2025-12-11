@@ -1,7 +1,8 @@
-﻿@{
+﻿@model List<Busticket.Models.ViewModels.ReporteVentaVM1>
+
+@{
     Layout = null;
     <script src="https://cdn.tailwindcss.com"></script>
-
 }
 
 <header class="py-6">
@@ -11,7 +12,6 @@
             <a href="/Home/Index">Busticket</a>
         </div>
 
-    
         <div class="flex items-center">
             <a href="/sapo">
                 <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23284D67' viewBox='0 0 24 24'><path d='M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10 1.657-10 5v3h20v-3c0-3.343-6.686-5-10-5z'/></svg>"
@@ -28,19 +28,47 @@
         Panel Administrativo
     </h1>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+    <!-- Tus botones -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-12">
 
         <a asp-controller="Admin" asp-action="Rutas"
            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl shadow-md text-center font-semibold transition">
             Ver Rutas
         </a>
 
-
         <a asp-controller="Empresa" asp-action="Index"
            class="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl shadow-md text-center font-semibold transition">
             Ver empresa
         </a>
 
+    </div>
+
+    <!-- TABLA DE REPORTES -->
+    <h2 class="text-2xl font-bold mb-4 text-gray-700">Reporte de Ventas</h2>
+
+    <div class="overflow-x-auto">
+        <table class="w-full bg-white shadow-md rounded-lg overflow-hidden">
+            <thead class="bg-gray-200 text-gray-700">
+                <tr>
+                    <th class="px-4 py-2 text-left">Venta ID</th>
+                    <th class="px-4 py-2 text-left">Usuario</th>
+                    <th class="px-4 py-2 text-left">Empresa</th>
+                    <th class="px-4 py-2 text-left">Fecha</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="border-b">
+                        <td class="px-4 py-2">@item.VentaId</td>
+                        <td class="px-4 py-2">@item.Usuario</td>
+                        <td class="px-4 py-2">@item.Empresa</td>
+                        <td class="px-4 py-2">@item.Fecha.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 
 </div>

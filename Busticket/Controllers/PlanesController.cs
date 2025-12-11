@@ -1,5 +1,6 @@
 using Busticket.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Busticket.Controllers
 {
@@ -14,8 +15,13 @@ namespace Busticket.Controllers
 
         public IActionResult Index()
         {
-            var rutas = _context.Ruta.ToList(); 
-            return View(rutas);                  
+            var rutas = _context.Ruta
+                .Include(r => r.Empresa)
+                .Include(r => r.CiudadOrigen)
+                .Include(r => r.CiudadDestino)
+                .ToList();
+
+            return View(rutas);
         }
     }
 }
