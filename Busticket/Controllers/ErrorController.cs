@@ -4,22 +4,19 @@ namespace Busticket.Controllers
 {
     public class ErrorController : Controller
     {
-        // Manejo de errores 404, 403, etc.
         [Route("Error/HttpStatus")]
         public IActionResult HttpStatus(int code)
         {
             if (code == 404)
-                return View("404"); // Vista 404.cshtml
+                return View("~/Views/Shared/404.cshtml");
 
-            // Puedes manejar otros códigos si quieres
-            return View("Error"); // Vista genérica
+            return View("~/Views/Shared/Error.cshtml");
         }
 
-        // Manejo de error 500
-        [Route("Error/ServerError")]
-        public IActionResult ServerError()
+        [Route("Error/Error500")]
+        public IActionResult Error500()
         {
-            return View("500"); // Vista 500.cshtml
+            return View("~/Views/Shared/500.cshtml");
         }
     }
 }

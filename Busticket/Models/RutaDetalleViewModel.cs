@@ -1,6 +1,6 @@
 namespace Busticket.Models
 {
-    public class RutaDetalleViewModel
+    public class ReporteVentaVM
     {
         public Ruta Ruta { get; set; }
 

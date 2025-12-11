@@ -10,7 +10,6 @@ namespace Busticket.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 
-        public DbSet<Usuario> Usuario { get; set; }
         public DbSet<Ruta> Ruta { get; set; }
         public DbSet<Empresa> Empresa { get; set; }
         public DbSet<Bus> Bus { get; set; }
@@ -28,8 +27,7 @@ namespace Busticket.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Mapear tablas (todas en singular, coinciden con SQL Server)
-            modelBuilder.Entity<Usuario>().ToTable("Usuario");
+            // ---- Tablas en singular ----
             modelBuilder.Entity<Ruta>().ToTable("Ruta");
             modelBuilder.Entity<Empresa>().ToTable("Empresa");
             modelBuilder.Entity<Bus>().ToTable("Bus");
@@ -48,7 +46,7 @@ namespace Busticket.Data
                 .Property(r => r.Precio)
                 .HasColumnType("decimal(18,2)");
 
-            // Relaciones de Ruta
+            // --- Relaciones Ruta ---
             modelBuilder.Entity<Ruta>()
                 .HasOne(r => r.CiudadOrigen)
                 .WithMany()
@@ -61,7 +59,7 @@ namespace Busticket.Data
                 .HasForeignKey(r => r.CiudadDestinoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relaciones de Itinerario
+            // --- Relaciones Itinerario ---
             modelBuilder.Entity<Itinerario>()
                 .HasOne(i => i.Ruta)
                 .WithMany()
@@ -80,49 +78,64 @@ namespace Busticket.Data
                 .HasForeignKey(i => i.ConductorId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Relaciones Asiento
+            // --- Relaciones Asiento ---
             modelBuilder.Entity<Asiento>()
                 .HasOne(a => a.Ruta)
                 .WithMany(r => r.Asiento)
                 .HasForeignKey(a => a.RutaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Relaciones Boleto
+            // --- Relaciones Boleto (IdentityUser) ---
             modelBuilder.Entity<Boleto>()
-                .HasOne(b => b.Usuario)
+                .HasOne(b => b.User)
                 .WithMany()
-                .HasForeignKey(b => b.UsuarioId);
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Boleto>()
                 .HasOne(b => b.Itinerario)
                 .WithMany()
                 .HasForeignKey(b => b.ItinerarioId);
 
-            // Relaciones Resena
+            // --- Relaciones Resena (IdentityUser) ---
             modelBuilder.Entity<Resena>()
-                .HasOne(r => r.Usuario)
+                .HasOne(r => r.User)
                 .WithMany()
-                .HasForeignKey(r => r.UsuarioId);
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Resena>()
                 .HasOne(r => r.Ruta)
                 .WithMany()
                 .HasForeignKey(r => r.RutaId);
 
-            // Relaciones Venta
+            // --- Relaciones Venta ---
             modelBuilder.Entity<Venta>()
-                .HasOne<Ruta>()
+            .HasOne(v => v.User)
+             .WithMany()
+             .HasForeignKey(v => v.UserId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Venta>()
+                .HasOne(v => v.Empresa)
                 .WithMany()
-                .HasForeignKey(v => v.RutaId)
+                .HasForeignKey(v => v.EmpresaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Venta>()
-                .HasOne<Asiento>()
+                .HasOne(v => v.Asiento)
                 .WithMany()
                 .HasForeignKey(v => v.AsientoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Seed de Ciudades
+            modelBuilder.Entity<Venta>()
+                .HasOne(v => v.Ruta)
+                .WithMany()
+                .HasForeignKey(v => v.RutaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // ---- Seed de Ciudades ----
             modelBuilder.Entity<Ciudad>().HasData(
                 new Ciudad { CiudadId = 1, Nombre = "Bogotá", Lat = 4.60971, Lng = -74.08175 },
                 new Ciudad { CiudadId = 2, Nombre = "Medellín", Lat = 6.2442, Lng = -75.58121 },

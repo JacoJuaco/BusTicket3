@@ -98,22 +98,6 @@ namespace Busticket.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Usuario",
-                columns: table => new
-                {
-                    UsuarioId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Telefono = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Usuario", x => x.UsuarioId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -272,10 +256,10 @@ namespace Busticket.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CiudadOrigenId = table.Column<int>(type: "int", nullable: false),
                     CiudadDestinoId = table.Column<int>(type: "int", nullable: false),
-                    DuracionMin = table.Column<int>(type: "int", nullable: false),
+                    EmpresaId = table.Column<int>(type: "int", nullable: false),
                     Precio = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ImagenUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EmpresaId = table.Column<int>(type: "int", nullable: false)
+                    DuracionMin = table.Column<int>(type: "int", nullable: false),
+                    ImagenUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -334,7 +318,7 @@ namespace Busticket.Migrations
                 {
                     AsientoId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Codigo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Numero = table.Column<int>(type: "int", nullable: false),
                     Disponible = table.Column<bool>(type: "bit", nullable: false),
                     RutaId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -391,7 +375,7 @@ namespace Busticket.Migrations
                 {
                     ResenaId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UsuarioId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     RutaId = table.Column<int>(type: "int", nullable: false),
                     Calificacion = table.Column<int>(type: "int", nullable: false),
                     Comentario = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -401,16 +385,16 @@ namespace Busticket.Migrations
                 {
                     table.PrimaryKey("PK_Resena", x => x.ResenaId);
                     table.ForeignKey(
+                        name: "FK_Resena_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Resena_Ruta_RutaId",
                         column: x => x.RutaId,
                         principalTable: "Ruta",
                         principalColumn: "RutaId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Resena_Usuario_UsuarioId",
-                        column: x => x.UsuarioId,
-                        principalTable: "Usuario",
-                        principalColumn: "UsuarioId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -420,6 +404,8 @@ namespace Busticket.Migrations
                 {
                     VentaId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    EmpresaId = table.Column<int>(type: "int", nullable: false),
                     AsientoId = table.Column<int>(type: "int", nullable: false),
                     RutaId = table.Column<int>(type: "int", nullable: false),
                     Fecha = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -432,6 +418,18 @@ namespace Busticket.Migrations
                         column: x => x.AsientoId,
                         principalTable: "Asiento",
                         principalColumn: "AsientoId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Venta_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Venta_Empresa_EmpresaId",
+                        column: x => x.EmpresaId,
+                        principalTable: "Empresa",
+                        principalColumn: "EmpresaId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Venta_Ruta_RutaId",
@@ -447,7 +445,7 @@ namespace Busticket.Migrations
                 {
                     BoletoId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UsuarioId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ItinerarioId = table.Column<int>(type: "int", nullable: false),
                     Asiento = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FechaCompra = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -456,16 +454,16 @@ namespace Busticket.Migrations
                 {
                     table.PrimaryKey("PK_Boleto", x => x.BoletoId);
                     table.ForeignKey(
+                        name: "FK_Boleto_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Boleto_Itinerario_ItinerarioId",
                         column: x => x.ItinerarioId,
                         principalTable: "Itinerario",
                         principalColumn: "ItinerarioId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Boleto_Usuario_UsuarioId",
-                        column: x => x.UsuarioId,
-                        principalTable: "Usuario",
-                        principalColumn: "UsuarioId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -532,9 +530,9 @@ namespace Busticket.Migrations
                 column: "ItinerarioId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Boleto_UsuarioId",
+                name: "IX_Boleto_UserId",
                 table: "Boleto",
-                column: "UsuarioId");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bus_EmpresaId",
@@ -577,9 +575,9 @@ namespace Busticket.Migrations
                 column: "RutaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Resena_UsuarioId",
+                name: "IX_Resena_UserId",
                 table: "Resena",
-                column: "UsuarioId");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Ruta_CiudadDestinoId",
@@ -602,9 +600,19 @@ namespace Busticket.Migrations
                 column: "AsientoId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Venta_EmpresaId",
+                table: "Venta",
+                column: "EmpresaId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Venta_RutaId",
                 table: "Venta",
                 column: "RutaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Venta_UserId",
+                table: "Venta",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -644,16 +652,13 @@ namespace Busticket.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Itinerario");
 
             migrationBuilder.DropTable(
-                name: "Usuario");
+                name: "Asiento");
 
             migrationBuilder.DropTable(
-                name: "Asiento");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Bus");
