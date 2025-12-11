@@ -1,93 +1,105 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Busticket.Models;  
-using Busticket.Data;    
-using Microsoft.AspNetCore.Http; 
+﻿using Busticket.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Busticket.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly Data.ApplicationDbContext _context;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
 
-       
-        public AuthController(Data.ApplicationDbContext context)
+        public AuthController(
+            SignInManager<IdentityUser> signInManager,
+            UserManager<IdentityUser> userManager)
         {
-            _context = context;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         // GET: /Auth/Login
         [HttpGet]
         public IActionResult Login()
         {
-            return View(); 
+            return View();
         }
 
         // POST: /Auth/Login
         [HttpPost]
-        public IActionResult Login(LoginViewModel model)
+        public async Task<IActionResult> Login(string email, string password)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                return View();
 
-          
-            var usuario = _context.Usuarios
-                                  .FirstOrDefault(u => u.Email == model.Email && u.Password == model.Password);
+            var user = await _userManager.FindByEmailAsync(email);
 
-            if (usuario != null)
+            if (user == null)
             {
-                HttpContext.Session.SetString("Usuario", usuario.Email);
-                return RedirectToAction("Index", "Home");
+                ViewBag.Error = "Credenciales incorrectas";
+                return View();
             }
 
+            var result = await _signInManager.PasswordSignInAsync(
+                user,
+                password,
+                false,
+                false
+            );
+
+            if (result.Succeeded)
+                return RedirectToAction("Index", "Home");
+
             ViewBag.Error = "Credenciales incorrectas";
-            return View(model);
+            return View();
         }
 
         // GET: /Auth/Register
         [HttpGet]
         public IActionResult Register()
         {
-            return View(); 
+            return View();
         }
 
         // POST: /Auth/Register
         [HttpPost]
-        public IActionResult Register(RegisterViewModel model)
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            var existe = _context.Usuarios.Any(u => u.Email == model.Email);
-            if (existe)
+            if (model.Password != model.ConfirmPassword)
             {
-                ModelState.AddModelError("Email", "Este correo ya está registrado");
+                ViewBag.Error = "Las contraseñas no coinciden";
                 return View(model);
             }
 
-          
-            var usuario = new Usuario
+            var exists = await _userManager.FindByEmailAsync(model.Email);
+            if (exists != null)
             {
-                Nombre = model.Nombre,
+                ViewBag.Error = "Este correo ya está registrado";
+                return View(model);
+            }
+
+            var user = new IdentityUser
+            {
                 Email = model.Email,
-                Password = model.Password 
+                UserName = model.Email,
+                EmailConfirmed = true
             };
 
-            _context.Usuarios.Add(usuario);
-            _context.SaveChanges();
+            var result = await _userManager.CreateAsync(user, model.Password);
 
-           
-            HttpContext.Session.SetString("Usuario", usuario.Email);
+            if (result.Succeeded)
+            {
+                // Rol por defecto
+                await _userManager.AddToRoleAsync(user, "Cliente");
+                return RedirectToAction("Login");
+            }
 
-            return RedirectToAction("Index", "Home");
+            ViewBag.Error = string.Join(" | ", result.Errors.Select(e => e.Description));
+            return View(model);
         }
 
-        // GET: /Auth/Logout
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login");
-        }
     }
-    
 }
-

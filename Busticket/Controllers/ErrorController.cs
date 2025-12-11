@@ -1,19 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
 
-public class ErrorController : Controller
+namespace Busticket.Controllers
 {
-    [Route("Error/HttpStatus")]
-    public IActionResult HttpStatus(int code)
+    public class ErrorController : Controller
     {
-        if (code == 404)
-            return View("~/Views/Shared/404.cshtml");
+        // Manejo de errores 404, 403, etc.
+        [Route("Error/HttpStatus")]
+        public IActionResult HttpStatus(int code)
+        {
+            if (code == 404)
+                return View("404"); // Vista 404.cshtml
 
-        return View("~/Views/Shared/500.cshtml");
-    }
+            // Puedes manejar otros códigos si quieres
+            return View("Error"); // Vista genérica
+        }
 
-    [Route("Error/ServerError")]
-    public IActionResult ServerError()
-    {
-        return View("~/Views/Shared/500.cshtml");
+        // Manejo de error 500
+        [Route("Error/ServerError")]
+        public IActionResult ServerError()
+        {
+            return View("500"); // Vista 500.cshtml
+        }
     }
 }
