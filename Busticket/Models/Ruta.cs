@@ -14,21 +14,21 @@ namespace Busticket.Models
         public int CiudadOrigenId { get; set; }   // ← YA NO ES NULLABLE
 
         [ForeignKey("CiudadOrigenId")]
-        public Ciudad CiudadOrigen { get; set; }  // ← YA NO ES NULLABLE
+        public Ciudad? CiudadOrigen { get; set; }  // ← YA NO ES NULLABLE
 
         // Ciudad Destino
         [Required(ErrorMessage = "Debe seleccionar la ciudad de destino.")]
         public int CiudadDestinoId { get; set; }  // ← YA NO ES NULLABLE
 
         [ForeignKey("CiudadDestinoId")]
-        public Ciudad CiudadDestino { get; set; } // ← YA NO ES NULLABLE
+        public Ciudad? CiudadDestino { get; set; } // ← YA NO ES NULLABLE
 
         // Empresa
         [Required(ErrorMessage = "Debe seleccionar una empresa.")]
         public int EmpresaId { get; set; }        // ← YA NO ES NULLABLE
 
         [ForeignKey("EmpresaId")]
-        public Empresa Empresa { get; set; }      // ← YA NO ES NULLABLE
+        public Empresa? Empresa { get; set; }      // ← YA NO ES NULLABLE
 
         // Precio
         [Required(ErrorMessage = "Debe ingresar un precio.")]
