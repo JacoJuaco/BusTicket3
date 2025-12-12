@@ -1,13 +1,15 @@
 # Busticket
 BusTicket – Sistema de Gestión de Rutas y Venta de Boletos
 
-BusTicket es una aplicación web desarrollada en ASP.NET Core MVC que permite gestionar rutas de transporte, visualizar información detallada de cada ruta, seleccionar asientos disponibles y generar compras.
+BusTicket es una aplicación web desarrollada en webforms
+que permite gestionar rutas de transporte, visualizar información detallada de cada ruta, seleccionar asientos disponibles y generar compras.
 
 Incluye integración con Cloudinary, manejo de carrito de compras, sesiones, migraciones con Entity Framework Core, y un diseño moderno usando TailwindCSS.
 
 🚀 Tecnologías utilizadas
 
-ASP.NET Core MVC 8
+ASP.NET webforms
+
 
 Entity Framework Core
 
@@ -15,7 +17,7 @@ SQL Server
 
 TailwindCSS
 
-Cloudinary (para imágenes)
+
 
 C#
 
@@ -55,15 +57,7 @@ En appsettings.json:
   "DefaultConnection": "Server=TU_SERVIDOR;Database=BusTicketDB;Trusted_Connection=True;MultipleActiveResultSets=true"
 }
 
-☁️ Configuración de Cloudinary (opcional)
 
-Agrega en appsettings.json:
-
-"Cloudinary": {
-  "CloudName": "TU_CLOUD_NAME",
-  "ApiKey": "TU_API_KEY",
-  "ApiSecret": "TU_API_SECRET"
-}
 
 🛠 Aplicar migraciones
 
