@@ -1,4 +1,5 @@
-﻿using Busticket.Models;
+﻿using Busticket.Data;
+using Busticket.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,28 +9,34 @@ namespace Busticket.Controllers
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
         public AuthController(
             SignInManager<IdentityUser> signInManager,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _context = context;
         }
 
-        // GET: /Auth/Login
+        /* ===================== LOGIN ===================== */
+
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: /Auth/Login
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                ViewBag.Error = "Ingrese correo y contraseña";
                 return View();
+            }
 
             var user = await _userManager.FindByEmailAsync(email);
 
@@ -46,60 +53,110 @@ namespace Busticket.Controllers
                 false
             );
 
-            if (result.Succeeded)
-                return RedirectToAction("Index", "Home");
+            if (!result.Succeeded)
+            {
+                ViewBag.Error = "Credenciales incorrectas";
+                return View();
+            }
 
-            ViewBag.Error = "Credenciales incorrectas";
-            return View();
+
+            return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Auth/Register
+        /* ===================== REGISTER ===================== */
+
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // POST: /Auth/Register
-        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            /* 🔹 Validaciones base */
             if (!ModelState.IsValid)
                 return View(model);
 
-            if (model.Password != model.ConfirmPassword)
+            /* 🔹 Validaciones según tipo */
+            if (model.TipoUsuario == "Empresa")
             {
-                ViewBag.Error = "Las contraseñas no coinciden";
-                return View(model);
+                if (string.IsNullOrWhiteSpace(model.NombreEmpresa))
+                    ModelState.AddModelError("NombreEmpresa", "El nombre de la empresa es obligatorio");
+
+                if (string.IsNullOrWhiteSpace(model.Nit))
+                    ModelState.AddModelError("Nit", "El NIT es obligatorio");
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(model.Nombre))
+                    ModelState.AddModelError("Nombre", "El nombre es obligatorio");
             }
 
-            var exists = await _userManager.FindByEmailAsync(model.Email);
-            if (exists != null)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            /* 🔹 Verificar si el correo ya existe */
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
             {
                 ViewBag.Error = "Este correo ya está registrado";
                 return View(model);
             }
 
+            /* 🔹 Crear usuario Identity */
             var user = new IdentityUser
             {
-                Email = model.Email,
                 UserName = model.Email,
+                Email = model.Email,
                 EmailConfirmed = true
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                // Rol por defecto
-                await _userManager.AddToRoleAsync(user, "Cliente");
-                return RedirectToAction("Login");
+                ViewBag.Error = string.Join(" | ", result.Errors.Select(e => e.Description));
+                return View(model);
             }
 
-            ViewBag.Error = string.Join(" | ", result.Errors.Select(e => e.Description));
-            return View(model);
+            /* 🔹 Asignar rol */
+            var role = model.TipoUsuario == "Empresa"
+                ? "Empresa"
+                : "Cliente";
+
+            await _userManager.AddToRoleAsync(user, role);
+
+            /* 🔹 Crear Empresa automáticamente */
+            if (model.TipoUsuario == "Empresa")
+            {
+                var empresa = new Empresa
+                {
+                    Nombre = model.NombreEmpresa!,
+                    Nit = model.Nit!,
+                    Email = model.Email,
+                    UserId = user.Id
+                };
+
+                _context.Empresa.Add(empresa);
+                await _context.SaveChangesAsync();
+            }
+
+            /* 🔹 Login automático */
+            await _signInManager.SignInAsync(user, false);
+
+            /* 🔹 Redirección */
+          
+
+            return RedirectToAction("Index", "Home");
         }
 
+        /* ===================== LOGOUT ===================== */
+
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
+        }
     }
 }

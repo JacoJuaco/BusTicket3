@@ -10,74 +10,120 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Busticket</title>
 
- 
+    <!-- Fuente -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Animaciones -->
+    <style>
+        @@keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-up {
+            animation: fadeUp 0.9s ease-out forwards;
+        }
+
+        .delay-1 {
+            animation-delay: .2s;
+        }
+
+        .delay-2 {
+            animation-delay: .4s;
+        }
+
+        .delay-3 {
+            animation-delay: .6s;
+        }
+    </style>
 </head>
+
 <body class="font-inter bg-white text-gray-700">
 
-    <header class="py-6">
+    <!-- HEADER -->
+    <header class="py-6 animate-fade-up">
         <div class="w-[95%] max-w-[1400px] mx-auto flex items-center justify-between">
-
-            <div class="text-3xl font-extrabold text-[#284D67] cursor-pointer">
+          
+            <!-- LOGO -->
+            <div class="text-3xl font-extrabold text-[#284D67] cursor-pointer transition-transform duration-300 hover:scale-105">
                 <a href="/Home/Index">Busticket</a>
             </div>
 
+            <!-- PANEL POR ROL -->
             @if (User.IsInRole("Admin"))
             {
-                <li>
-                    <a href="/Admin/Index" class="text-blue-600 font-bold">Panel Admin</a>
-                </li>
+                <a href="/Admin/Index"
+                   class="text-red-600 font-bold hover:underline">
+                    Panel Administrador
+                </a>
+            }
+            @if (User.IsInRole("Empresa"))
+            {
+                <a href="/PanelEmpresa/Index"
+                   class="text-blue-600 font-bold">
+                    Panel Empresa
+                </a>
             }
 
+
+            <!-- NAV -->
             <nav class="flex gap-12">
-                <a href="/Itinerarios/Index" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Destinos</a>
+                <a href="/Itinerarios/Index"
+                   class="relative font-medium after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-[#284D67] after:transition-all after:duration-300 hover:after:w-full">
+                    Destinos
+                </a>
 
-                <a href="/Planes/Index" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Planes</a>
+                <a href="/Planes/Index"
+                   class="relative font-medium after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-[#284D67] after:transition-all after:duration-300 hover:after:w-full">
+                    Planes
+                </a>
 
-                <a href="/Descuentos/Index" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Descuentos</a>
+                <a href="/Descuentos/Index"
+                   class="relative font-medium after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-[#284D67] after:transition-all after:duration-300 hover:after:w-full">
+                    Descuentos
+                </a>
             </nav>
 
-
-        
-            <div class="flex items-center">
-               
-
-               <a href="/sapo"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23284D67' viewBox='0 0 24 24'><path d='M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10 1.657-10 5v3h20v-3c0-3.343-6.686-5-10-5z'/></svg>"
-                         class="w-7 ml-4 cursor-pointer">
-                </a>
-            </div>
-
+            <!-- PERFIL -->
+            <a href="/sapo">
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23284D67' viewBox='0 0 24 24'><path d='M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10 1.657-10 5v3h20v-3c0-3.343-6.686-5-10-5z'/></svg>"
+                     class="w-7 ml-4 cursor-pointer transition-transform duration-300 hover:scale-110">
+            </a>
         </div>
     </header>
 
- 
-   
-
-    <section class="mt-8 w-[95%] max-w-[1700px] mx-auto">
-        <div class="relative h-[650px] rounded-xl bg-cover bg-center flex justify-center items-end"
+    <!-- HERO -->
+    <section class="mt-8 w-[95%] max-w-[1700px] mx-auto animate-fade-up delay-1">
+        <div class="relative h-[650px] rounded-2xl overflow-hidden bg-cover bg-center flex items-end justify-center"
              style="background-image: url('https://res.cloudinary.com/dbt58u6ag/image/upload/v1764883553/imagen_fondo_d86xtq.jpg');">
 
-           
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 rounded-xl"></div>
+            <!-- Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/60"></div>
 
-           
-            <div class="relative z-10 text-center mb-14">
-                <h1 class="text-white text-5xl md:text-6xl font-extrabold mb-5">
-                    Tu próximo destino empieza aquí.
+            <!-- CONTENIDO -->
+            <div class="relative z-10 text-center mb-16 animate-fade-up delay-2">
+                <h1 class="text-white text-5xl md:text-6xl font-extrabold mb-6 drop-shadow-lg">
+                    Tu próximo destino empieza aquí
                 </h1>
+
                 <a href="/Rutas/Index"
-                   class="px-4 py-1 rounded-full bg-white font-semibold text-sm md:text-base hover:bg-[#284D67] hover:text-white transition inline-block">
+                   class="inline-block px-8 py-3 rounded-full bg-white font-semibold text-lg
+                          transition-all duration-300 hover:bg-[#284D67] hover:text-white hover:scale-105">
                     Buscar ruta
                 </a>
-
             </div>
-
         </div>
     </section>
-
 
 </body>
 </html>
