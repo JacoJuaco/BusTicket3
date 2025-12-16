@@ -2,73 +2,181 @@
 
 @{
     Layout = null;
-    <script src="https://cdn.tailwindcss.com"></script>
 }
 
-<header class="py-6">
-    <div class="w-[95%] max-w-[1400px] mx-auto flex items-center justify-between">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Panel Administrativo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
 
-        <div class="text-3xl font-extrabold text-[#284D67] cursor-pointer">
-            <a href="/Home/Index">Busticket</a>
-        </div>
+<body class="bg-gray-100">
 
-        <div class="flex items-center">
+    <!-- HEADER -->
+    <header class="py-6 bg-white shadow">
+        <div class="w-[95%] max-w-[1400px] mx-auto flex items-center justify-between">
+
+            <div class="text-3xl font-extrabold text-[#284D67]">
+                <a href="/Home/Index">Busticket</a>
+            </div>
+
             <a href="/sapo">
-                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23284D67' viewBox='0 0 24 24'><path d='M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10 1.657-10 5v3h20v-3c0-3.343-6.686-5-10-5z'/></svg>"
-                     class="w-7 ml-4 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="28" height="28"
+                     fill="#284D67"
+                     viewBox="0 0 24 24"
+                     class="w-7 ml-4 cursor-pointer transition-transform duration-300 hover:scale-110">
+                    <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10 1.657-10 5v3h20v-3c0-3.343-6.686-5-10-5z" />
+                </svg>
+            </a>
+
+
+        </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <div class="max-w-5xl mx-auto mt-14 px-4">
+
+        <h1 class="text-4xl font-bold text-gray-800 mb-10 text-center">
+            Panel Administrativo
+        </h1>
+
+        <!-- BOTONES -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-12">
+            <a asp-controller="Admin" asp-action="Rutas"
+               class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl shadow-md text-center font-semibold transition">
+                Ver Rutas
+            </a>
+
+            <a asp-controller="Empresa" asp-action="Index"
+               class="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl shadow-md text-center font-semibold transition">
+                Ver Empresa
             </a>
         </div>
 
-    </div>
-</header>
+        <!-- FILTROS + EXCEL -->
+        <div class="bg-white p-5 rounded-xl shadow mb-6 flex flex-wrap gap-4 items-end">
 
-<div class="max-w-3xl mx-auto mt-16 px-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-600">Desde</label>
+                <input type="date" id="fechaInicio"
+                       class="border rounded px-3 py-2 text-sm">
+            </div>
 
-    <h1 class="text-4xl font-bold text-gray-800 mb-10 text-center">
-        Panel Administrativo
-    </h1>
+            <div>
+                <label class="block text-sm font-semibold text-gray-600">Hasta</label>
+                <input type="date" id="fechaFin"
+                       class="border rounded px-3 py-2 text-sm">
+            </div>
 
-    <!-- Tus botones -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-12">
+            <button type="button"
+                    onclick="filtrarTabla()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                Filtrar
+            </button>
 
-        <a asp-controller="Admin" asp-action="Rutas"
-           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl shadow-md text-center font-semibold transition">
-            Ver Rutas
-        </a>
+            <button type="button"
+                    onclick="exportarExcel()"
+                    class="ml-auto bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                📥 Descargar Excel
+            </button>
+        </div>
 
-        <a asp-controller="Empresa" asp-action="Index"
-           class="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl shadow-md text-center font-semibold transition">
-            Ver empresa
-        </a>
+        <!-- TABLA -->
+        <div class="overflow-x-auto">
+            <table id="tablaVentas"
+                   class="w-full bg-white shadow-md rounded-lg overflow-hidden">
 
-    </div>
-
-    <!-- TABLA DE REPORTES -->
-    <h2 class="text-2xl font-bold mb-4 text-gray-700">Reporte de Ventas</h2>
-
-    <div class="overflow-x-auto">
-        <table class="w-full bg-white shadow-md rounded-lg overflow-hidden">
-            <thead class="bg-gray-200 text-gray-700">
-                <tr>
-                    <th class="px-4 py-2 text-left">Venta ID</th>
-                    <th class="px-4 py-2 text-left">Usuario</th>
-                    <th class="px-4 py-2 text-left">Empresa</th>
-                    <th class="px-4 py-2 text-left">Fecha</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr class="border-b">
-                        <td class="px-4 py-2">@item.VentaId</td>
-                        <td class="px-4 py-2">@item.Usuario</td>
-                        <td class="px-4 py-2">@item.Empresa</td>
-                        <td class="px-4 py-2">@item.Fecha.ToString("dd/MM/yyyy")</td>
+                <thead class="bg-gray-200 text-gray-700">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Venta ID</th>
+                        <th class="px-4 py-2 text-left">Usuario</th>
+                        <th class="px-4 py-2 text-left">Empresa</th>
+                        <th class="px-4 py-2 text-left">Fecha</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="border-b hover:bg-gray-50 transition"
+                            data-fecha="@item.Fecha.ToString("yyyy-MM-dd")">
+                            <td class="px-4 py-2">@item.VentaId</td>
+                            <td class="px-4 py-2">@item.Usuario</td>
+                            <td class="px-4 py-2">@item.Empresa</td>
+                            <td class="px-4 py-2">@item.Fecha.ToString("dd/MM/yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+
     </div>
 
-</div>
+    <!-- JS -->
+    <script type="text/javascript">
+        function filtrarTabla() {
+
+            const inicio = document.getElementById('fechaInicio').value;
+            const fin = document.getElementById('fechaFin').value;
+
+            const filas = document.querySelectorAll('#tablaVentas tbody tr');
+
+            filas.forEach(fila => {
+
+                const fechaFila = fila.getAttribute('data-fecha');
+                let mostrar = true;
+
+                if (inicio && fechaFila < inicio) mostrar = false;
+                if (fin && fechaFila > fin) mostrar = false;
+
+                fila.style.display = mostrar ? '' : 'none';
+            });
+        }
+
+        function exportarExcel() {
+
+            const filas = document.querySelectorAll('#tablaVentas tbody tr');
+            let tabla =
+                "<table border='1'>" +
+                document.querySelector('#tablaVentas thead').outerHTML +
+                "<tbody>";
+
+            filas.forEach(fila => {
+                if (fila.style.display !== 'none') {
+                    tabla += fila.outerHTML;
+                }
+            });
+
+            tabla += "</tbody></table>";
+
+            const html =
+                "<html>" +
+                "<head><meta charset='UTF-8'></head>" +
+                "<body>" +
+                tabla +
+                "</body>" +
+                "</html>";
+
+            const blob = new Blob([html], {
+                type: "application/vnd.ms-excel"
+            });
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "Reporte_Ventas.xls";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+
+
+</body>
+</html>

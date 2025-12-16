@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Busticket.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class RecreateEmpresa : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -80,21 +80,6 @@ namespace Busticket.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Conductor", x => x.ConductorId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Empresa",
-                columns: table => new
-                {
-                    EmpresaId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Pais = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Telefono = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Empresa", x => x.EmpresaId);
                 });
 
             migrationBuilder.CreateTable(
@@ -197,6 +182,31 @@ namespace Busticket.Migrations
                     table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
                     table.ForeignKey(
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Empresa",
+                columns: table => new
+                {
+                    EmpresaId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Nit = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Pais = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Telefono = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Empresa", x => x.EmpresaId);
+                    table.ForeignKey(
+                        name: "FK_Empresa_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -540,6 +550,11 @@ namespace Busticket.Migrations
                 column: "EmpresaId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Empresa_UserId",
+                table: "Empresa",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Itinerario_BusId",
                 table: "Itinerario",
                 column: "BusId");
@@ -658,9 +673,6 @@ namespace Busticket.Migrations
                 name: "Asiento");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Bus");
 
             migrationBuilder.DropTable(
@@ -674,6 +686,9 @@ namespace Busticket.Migrations
 
             migrationBuilder.DropTable(
                 name: "Empresa");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }

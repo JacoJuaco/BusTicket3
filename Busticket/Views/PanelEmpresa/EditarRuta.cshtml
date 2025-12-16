@@ -1,0 +1,76 @@
+﻿@model Busticket.Models.Ruta
+@{
+    Layout = "_Layout";
+}
+
+<div class="max-w-3xl mx-auto mt-10 bg-white p-6 rounded-xl shadow-md">
+    <h1 class="text-3xl font-bold mb-6">Editar Ruta</h1>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="text-red-600 mb-2">@TempData["ErrorMessage"]</div>
+    }
+
+    <form asp-controller="Admin" asp-action="EditarRuta" method="post" class="space-y-4">
+        <input type="hidden" asp-for="RutaId" />
+
+        <!-- Ciudad Origen -->
+        <div>
+            <label>Ciudad Origen</label>
+            <select asp-for="CiudadOrigenId" class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    asp-items="@(new SelectList(ViewBag.Ciudades ?? new List<Busticket.Models.Ciudad>(), "CiudadId", "Nombre", Model?.CiudadOrigenId))">
+                <option value="0">-- Seleccione Ciudad --</option>
+            </select>
+            <span asp-validation-for="CiudadOrigenId" class="text-red-600"></span>
+        </div>
+
+        <!-- Ciudad Destino -->
+        <div>
+            <label>Ciudad Destino</label>
+            <select asp-for="CiudadDestinoId" class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    asp-items="@(new SelectList(ViewBag.Ciudades ?? new List<Busticket.Models.Ciudad>(), "CiudadId", "Nombre", Model?.CiudadDestinoId))">
+                <option value="0">-- Seleccione Ciudad --</option>
+            </select>
+            <span asp-validation-for="CiudadDestinoId" class="text-red-600"></span>
+        </div>
+
+        <!-- Empresa -->
+        <div>
+            <label>Empresa</label>
+            <select asp-for="EmpresaId" class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    asp-items="@(new SelectList(ViewBag.Empresas ?? new List<Busticket.Models.Empresa>(), "EmpresaId", "Nombre", Model?.EmpresaId))">
+                <option value="0">-- Seleccione Empresa --</option>
+            </select>
+            <span asp-validation-for="EmpresaId" class="text-red-600"></span>
+        </div>
+
+        <!-- Precio -->
+        <div>
+            <label>Precio</label>
+            <input asp-for="Precio" type="number" step="0.01" min="0.01" class="w-full border border-gray-300 rounded px-3 py-2" />
+            <span asp-validation-for="Precio" class="text-red-600"></span>
+        </div>
+
+        <!-- Duración -->
+        <div>
+            <label>Duración (min)</label>
+            <input asp-for="DuracionMin" type="number" min="1" class="w-full border border-gray-300 rounded px-3 py-2" />
+            <span asp-validation-for="DuracionMin" class="text-red-600"></span>
+        </div>
+
+        <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg">Actualizar</button>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const success = '@TempData["SuccessMessage"]';
+            const error = '@TempData["ErrorMessage"]';
+            if (success) Swal.fire('Éxito', success, 'success');
+            if (error) Swal.fire('Error', error, 'error');
+        });
+    </script>
+}

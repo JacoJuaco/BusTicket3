@@ -10,7 +10,7 @@ namespace Busticket.Data
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
             // 🔹 Roles que quieres en la app
-            string[] roles = { "Admin", "Conductor", "Cliente" };
+            string[] roles = { "Admin", "Conductor", "Cliente" ,"Empresa" };
 
             // 🔥 Crear roles si no existen
             foreach (var role in roles)
