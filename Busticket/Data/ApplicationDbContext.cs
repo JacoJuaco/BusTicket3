@@ -23,6 +23,7 @@ namespace Busticket.Data
         public DbSet<Venta> Venta { get; set; }
         public DbSet<Ciudad> Ciudad { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

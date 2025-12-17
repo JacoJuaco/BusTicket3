@@ -1,6 +1,7 @@
 using Busticket.Data;
+using Busticket.Models;
 using Microsoft.AspNetCore.Mvc;
-using Busticket.Models; // Asegúrate de tener esto
+using System.Linq;
 
 public class DescuentosController : Controller
 {
@@ -13,7 +14,13 @@ public class DescuentosController : Controller
 
     public IActionResult Index()
     {
-        var ofertas = _context.Oferta.ToList();  
-        return View(ofertas);                    
+        var ofertas = _context.Oferta.ToList();
+        return View(ofertas);
+    }
+
+    
+    public IActionResult Aplicar(int ofertaId)
+    {
+        return View("Aplicar");
     }
 }
