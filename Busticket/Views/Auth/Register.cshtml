@@ -54,7 +54,7 @@
 
     <div class="flex w-[1000px] h-[700px] bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeUp">
 
-        <!-- FORM -->
+  
         <div class="flex flex-col justify-center px-16 py-10 w-1/2">
 
             <h2 class="text-2xl font-bold text-gray-900 mb-1">¡Crea tu cuenta!</h2>
@@ -62,7 +62,6 @@
 
             <form asp-action="Register" method="post" class="space-y-5 animate-fadeIn">
 
-                <!-- SELECTOR -->
                 <div class="flex gap-2 mb-2">
                     <button type="button" data-tipo="Usuario"
                             class="tab-btn px-5 py-2 rounded-md bg-[#1f7f6d] text-white transition">
@@ -75,23 +74,22 @@
                     </button>
                 </div>
 
-                <!-- TIPO -->
                 <input type="hidden" asp-for="TipoUsuario" id="TipoUsuario" value="Usuario" />
 
-                <!-- FORM USUARIO -->
+          
                 <div id="formUsuario" class="space-y-4">
 
                     <div>
                         <label class="block font-medium text-gray-700 mb-1">Nombre completo</label>
                         <input asp-for="Nombre"
                                class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#143A58]"
-                               placeholder="nombre" />
+                               placeholder="Nombre completo" />
                         <span asp-validation-for="Nombre" class="text-red-600 text-sm"></span>
                     </div>
 
                 </div>
 
-                <!-- FORM EMPRESA -->
+      
                 <div id="formEmpresa" class="space-y-4 hidden opacity-0 transition-all duration-300">
 
                     <div>
@@ -105,14 +103,15 @@
                     <div>
                         <label class="block font-medium text-gray-700 mb-1">NIT</label>
                         <input asp-for="Nit"
+                               id="Nit"
                                class="w-full border rounded-lg p-3"
-                               placeholder="900123456" />
+                               placeholder="900123456-9"
+                               maxlength="11" />
                         <span asp-validation-for="Nit" class="text-red-600 text-sm"></span>
                     </div>
 
                 </div>
 
-                <!-- EMAIL (UNO SOLO PARA TODO) -->
                 <div>
                     <label class="block font-medium text-gray-700 mb-1">Correo electrónico</label>
                     <input asp-for="Email" type="email"
@@ -120,21 +119,44 @@
                            placeholder="correo@ejemplo.com" />
                     <span asp-validation-for="Email" class="text-red-600 text-sm"></span>
                 </div>
-
-                <!-- PASSWORD -->
                 <div>
                     <label class="block font-medium text-gray-700 mb-1">Contraseña</label>
-                    <input asp-for="Password" type="password"
-                           class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#143A58]" />
+
+                    <div class="relative">
+                        <input asp-for="Password"
+                               id="passwordInput"
+                               type="password"
+                               class="w-full border rounded-lg p-3 pr-12 focus:ring-2 focus:ring-[#143A58]" />
+
+                        <button type="button"
+                                onclick="togglePassword('passwordInput')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800">
+                            👁️
+                        </button>
+                    </div>
+
                     <span asp-validation-for="Password" class="text-red-600 text-sm"></span>
                 </div>
 
                 <div>
                     <label class="block font-medium text-gray-700 mb-1">Confirmar contraseña</label>
-                    <input asp-for="ConfirmPassword" type="password"
-                           class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#143A58]" />
+
+                    <div class="relative">
+                        <input asp-for="ConfirmPassword"
+                               id="confirmPasswordInput"
+                               type="password"
+                               class="w-full border rounded-lg p-3 pr-12 focus:ring-2 focus:ring-[#143A58]" />
+
+                        <button type="button"
+                                onclick="togglePassword('confirmPasswordInput')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800">
+                            👁️
+                        </button>
+                    </div>
+
                     <span asp-validation-for="ConfirmPassword" class="text-red-600 text-sm"></span>
                 </div>
+
 
                 <button class="w-full bg-[#143A58] text-white py-3 rounded-lg font-medium
                            transition hover:bg-[#0F2B45] hover:scale-[1.02] active:scale-95">
@@ -150,7 +172,7 @@
             </p>
         </div>
 
-        <!-- IMAGEN -->
+
         <div class="w-1/2">
             <img src="https://res.cloudinary.com/dbt58u6ag/image/upload/v1764884373/chris-lee-70l1tDAI6rM-unsplash_2_b4fmff.png"
                  class="w-full h-full object-cover transition-transform duration-[1200ms] hover:scale-105" />
@@ -158,12 +180,12 @@
 
     </div>
 
-    <!-- SCRIPT -->
     <script>
         const buttons = document.querySelectorAll(".tab-btn");
         const tipoInput = document.getElementById("TipoUsuario");
         const formUsuario = document.getElementById("formUsuario");
         const formEmpresa = document.getElementById("formEmpresa");
+        const nitInput = document.getElementById("Nit");
 
         buttons.forEach(btn => {
             btn.addEventListener("click", () => {
@@ -188,7 +210,25 @@
                 }
             });
         });
+
+        nitInput.addEventListener("input", () => {
+            let valor = nitInput.value.replace(/[^0-9]/g, "");
+
+            if (valor.length > 9) {
+                valor = valor.substring(0, 9);
+            }
+
+            nitInput.value = valor.length > 0 ? valor + "-9" : "";
+        });
+
     </script>
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === "password" ? "text" : "password";
+        }
+    </script>
+
 
 </body>
 </html>

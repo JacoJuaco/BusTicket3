@@ -1,5 +1,6 @@
 ﻿using Busticket.Data;
 using Busticket.Models;
+using Busticket.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -30,12 +31,24 @@ namespace Busticket.Controllers
                 .FirstOrDefaultAsync(e => e.UserId == userId);
 
             if (empresa == null)
-            {
                 return RedirectToAction("CrearEmpresa");
-            }
 
-            return View(empresa);
+            var ventas = await _context.Venta
+                .Where(v => v.EmpresaId == empresa.EmpresaId)
+                .Include(v => v.User)
+                .Include(v => v.Empresa)
+                .ToListAsync();
+
+            var vm = new PanelEmpresaVM
+            {
+                Empresa = empresa,
+                Ventas = ventas
+            };
+
+            return View(vm);
         }
+
+
 
         public IActionResult CrearEmpresa()
         {

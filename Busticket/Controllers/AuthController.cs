@@ -42,7 +42,7 @@ namespace Busticket.Controllers
 
             if (user == null)
             {
-                ViewBag.Error = "Credenciales incorrectas";
+                ViewBag.Error = "No existe una cuenta con este correo.";
                 return View();
             }
 
@@ -55,7 +55,7 @@ namespace Busticket.Controllers
 
             if (!result.Succeeded)
             {
-                ViewBag.Error = "Credenciales incorrectas";
+                ViewBag.Error = "La contraseña es incorrecta.";
                 return View();
             }
 

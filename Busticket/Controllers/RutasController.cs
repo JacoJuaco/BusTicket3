@@ -51,14 +51,17 @@ namespace Busticket.Controllers
 
             // Traer los asientos y marcar los vendidos
             var asientos = await _context.Asiento
-                .Where(a => a.RutaId == id)
-                .Select(a => new Asiento
-                {
-                    AsientoId = a.AsientoId,
-                    Numero = a.Numero,
-                    Disponible = !_context.Venta.Any(v => v.AsientoId == a.AsientoId)
-                })
-                .ToListAsync();
+       .Where(a => a.RutaId == id)
+       .Select(a => new Asiento
+       {
+           AsientoId = a.AsientoId,
+           Numero = a.Numero,
+           Disponible = a.Disponible
+       })
+       .ToListAsync();
+
+
+
 
             var vm = new ReporteVentaVM
             {
@@ -143,19 +146,21 @@ namespace Busticket.Controllers
 
         // POST: /Rutas/SeleccionarAsiento
         [HttpPost]
-        public IActionResult SeleccionarAsiento(string asientoCodigo, int precio)
+        public IActionResult SeleccionarAsiento(int asientoNumero, int precio)
         {
-            var carrito = HttpContext.Session.GetObjectFromJson<List<string>>("Carrito") ?? new List<string>();
+            var carrito = HttpContext.Session
+                .GetObjectFromJson<List<int>>("Carrito") ?? new List<int>();
 
-            if (carrito.Contains(asientoCodigo))
-                carrito.Remove(asientoCodigo);
+            if (carrito.Contains(asientoNumero))
+                carrito.Remove(asientoNumero);
             else
-                carrito.Add(asientoCodigo);
+                carrito.Add(asientoNumero);
 
             HttpContext.Session.SetObjectAsJson("Carrito", carrito);
             HttpContext.Session.SetInt32("Total", carrito.Count * precio);
 
-            return Json(new { success = true, carritoCount = carrito.Count });
+            return Json(new { success = true, count = carrito.Count });
         }
+
     }
 }

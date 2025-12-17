@@ -2,7 +2,7 @@
 @model Busticket.Models.ReporteVentaVM
 
 @{
-    ViewBag.Title = "Busticket - Home";
+    ViewBag.Title = "Busticket - Selección de Asientos";
     Layout = null;
 }
 
@@ -11,305 +11,291 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Busticket</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Detalle de Ruta</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        .asiento:hover .tooltip {
+            display: block;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100">
 
-
+    <!-- ================= HEADER ================= -->
     <header class="py-6 bg-white shadow-md">
         <div class="w-[95%] max-w-[1400px] mx-auto flex items-center justify-between">
 
-
-            <div class="text-3xl font-extrabold text-[#284D67] cursor-pointer">
+            <div class="text-3xl font-extrabold text-[#284D67]">
                 <a href="/Home/Index">Busticket</a>
             </div>
 
-
             <nav class="flex gap-12">
-
-                <a href="/Planes/Index" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Planes</a>
-
-                <a href="/Descuentos/Index" class="text-base font-medium hover:text-[#002C53] hover:font-bold">Descuentos</a>
+                <a href="/Planes/Index" class="hover:font-bold">Planes</a>
+                <a href="/Descuentos/Index" class="hover:font-bold">Descuentos</a>
             </nav>
 
+            <div class="relative">
+                <button id="btnCarrito">
+                    <i class="fa fa-shopping-cart text-2xl text-[#284D67]"></i>
+                </button>
 
-            <div class="flex items-center">
+                <div id="dropdownCarrito"
+                     class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4 z-50">
 
+                    <h3 class="font-bold mb-2">Carrito</h3>
 
-                <div class="relative ml-4">
-                    <button id="btnCarrito" class="p-2">
-                        <i class="fa fa-shopping-cart text-[#284D67] text-2xl"></i>
-                    </button>
+                    <ul id="listaCarrito" class="space-y-1 text-sm">
+                        @{
+                            var carrito = Context.Session.GetObjectFromJson<List<string>>("Carrito") ?? new();
+                            var total = Context.Session.GetString("Total") ?? "0";
+                        }
+                        @foreach (var item in carrito)
+                        {
+                            <li class="border-b pb-1">@item</li>
+                        }
+                    </ul>
 
-                    <div id="dropdownCarrito" class="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4 hidden z-50">
-                        <h3 class="font-bold text-gray-700">Carrito</h3>
-                        <ul id="listaCarrito" class="mt-3 space-y-1">
-                            @* Cargar inicial desde sesión *@
-                            @{
-                                var carrito = Context.Session.GetObjectFromJson<List<string>>("Carrito") ?? new List<string>();
-                                var total = Context.Session.GetString("Total") ?? "0";
-                            }
-                            @foreach (var item in carrito)
-                            {
-                                <li class="text-gray-800 text-sm border-b pb-1">@item</li>
-                            }
-                        </ul>
-                        <p class="mt-3 font-semibold text-gray-900">Total: $<span id="totalCarrito">@total</span></p>
-                        <a href="/Pago/index" class="mt-3 block bg-green-600 text-white text-center py-1 rounded hover:bg-green-700">
-                            Finalizar compra
-                        </a>
-                    </div>
+                    <p class="mt-2 font-semibold">
+                        Total: $<span id="totalCarrito">@total</span>
+                    </p>
+
+                    <a href="/Pago/Index"
+                       class="block mt-3 bg-green-600 text-white text-center rounded py-1">
+                        Finalizar compra
+                    </a>
                 </div>
-
-
-                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23284D67' viewBox='0 0 24 24'><path d='M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10 1.657-10 5v3h20v-3c0-3.343-6.686-5-10-5z'/></svg>"
-                     class="w-7 ml-4 cursor-pointer">
             </div>
-
         </div>
     </header>
 
-
+    <!-- ================= CONTENIDO ================= -->
     <div class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10">
 
-        <!-- COLUMNA IZQUIERDA -->
-        <div class="p-6 bg-white shadow-lg rounded-xl">
+        <!-- ===== MAPA DE SILLAS ===== -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
 
-            <h2 class="text-2xl font-bold mb-4">Selecciona tus asientos</h2>
+            <h2 class="text-2xl font-bold mb-4">Selecciona tu silla</h2>
 
-            <div class="flex justify-center mb-6">
-                <img src="@(string.IsNullOrEmpty(Model.Ruta.ImagenUrl)
-                                                               ? "/img/bus-default.png"
-                                                               : Model.Ruta.ImagenUrl)">
+            <!-- Leyenda -->
+            <div class="flex gap-6 text-sm mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 bg-white border-2 border-[#7a3e1d] rounded"></span>
+                    Disponible
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 bg-gray-300 rounded"></span>
+                    No disponible
+                </div>
             </div>
 
-            <div class="grid grid-cols-4 gap-4 justify-items-center">
-                @foreach (var asiento in Model.Asientos)
-                {
-                    bool esPasillo = asiento.Numero % 4 == 3;
-                    if (esPasillo)
+            <!-- BUS -->
+            <div class="mx-auto w-[360px] bg-white border-2 border-gray-300 rounded-[3rem] p-6 shadow-inner">
+
+                <div class="grid grid-cols-5 gap-3 justify-items-center">
+
+                    @foreach (var asiento in Model.Asientos)
                     {
-                        <div class="w-10"></div>
+                        bool esPasillo = asiento.Numero % 4 == 3;
+
+                        if (esPasillo)
+                        {
+                            <div class="w-6"></div>
+                        }
+
+                    <button class="asiento relative w-10 h-10 rounded-md text-xs font-bold
+                        border-2
+                        @(asiento.Disponible
+                                                        ? "bg-white border-[#7a3e1d] text-[#7a3e1d] hover:bg-[#7a3e1d] hover:text-white"
+                                                        : "bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed")
+                            transition"
+                                data-id="@asiento.AsientoId"
+                                data-codigo="@asiento.Numero"
+                                @(asiento.Disponible ? "" : "disabled")>
+
+                            @asiento.Numero
+
+                            @if (asiento.Disponible)
+                            {
+                                <div class="tooltip hidden absolute top-[-70px] left-1/2 -translate-x-1/2
+                                                bg-white border rounded-lg shadow-lg px-3 py-2 text-xs w-[150px]">
+                                    <p class="font-semibold">Silla n.º @asiento.Numero</p>
+                                    <p class="text-green-600">Disponible</p>
+                                    <p class="font-bold">
+                                        COP @Model.Ruta.Precio.ToString("N0")
+                                    </p>
+                                </div>
+                            }
+                        </button>
                     }
-
-                    <button class="asiento w-12 h-12 rounded-lg text-sm font-bold flex items-center justify-center
-                            @(asiento.Disponible ? "bg-green-500 hover:bg-green-600" : "bg-gray-400 cursor-not-allowed") text-white"
-                            data-id="@asiento.AsientoId"
-                            data-codigo="@asiento.Numero"
-                            @(asiento.Disponible ? "" : "disabled")>
-                        @asiento.Numero
-                    </button>
-                }
+                </div>
             </div>
-
         </div>
 
-        <!-- COLUMNA DERECHA -->
-        <div class="p-6 bg-white shadow-lg rounded-xl">
+        <!-- ===== DETALLE Y RESUMEN ===== -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
 
             <h1 class="text-3xl font-bold mb-4">
                 @Model.Ruta.CiudadOrigen?.Nombre —
                 @Model.Ruta.CiudadDestino?.Nombre
             </h1>
 
+            <p>🚍 Empresa: <b>@Model.Ruta.Empresa.Nombre</b></p>
+            <p>⏱ Duración: <b>@Model.Ruta.DuracionMin min</b></p>
+            <p>💵 Precio por asiento: <b>@Model.Ruta.Precio.ToString("N0") COP</b></p>
 
-            <div class="space-y-2 text-gray-700">
-                <p>🚍 <b>Empresa:</b> @Model.Ruta.Empresa.Nombre</p>
-                <p>⏱ <b>Duración:</b> @Model.Ruta.DuracionMin min</p>
-                <p>💵 <b>Precio por asiento:</b> @Model.Ruta.Precio.ToString("N0") COP</p>
-            </div>
-
-            <h2 class="text-2xl font-bold mt-8">🧾 Resumen de compra</h2>
+            <h2 class="text-2xl font-bold mt-6">Resumen</h2>
             <p class="text-lg mt-2">
                 Total: <span id="total">0</span> COP
             </p>
 
-            <div class="mt-6">
-                <form id="formCarrito">
-                    @Html.AntiForgeryToken()
-                </form>
+            <form id="formCarrito">
+                @Html.AntiForgeryToken()
+            </form>
 
-              
-                <button id="agregarCarrito"
-                        class="bg-[#284D67] text-white px-6 py-3 rounded-lg hover:bg-[#1f3a4d] transition shadow-md">
-                    Agregar al carrito
-                </button>
-            </div>
-
+            <button id="agregarCarrito"
+                    class="mt-4 bg-[#284D67] text-white px-6 py-3 rounded-lg hover:bg-[#1f3a4d]">
+                Agregar al carrito
+            </button>
         </div>
-
     </div>
 
-
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- ================= JS ================= -->
 
     <script>
         (() => {
 
+            // ---------------- CARRITO TOGGLE ----------------
+            const btnCarrito = document.getElementById("btnCarrito");
+            const dropdownCarrito = document.getElementById("dropdownCarrito");
+
+            btnCarrito.addEventListener("click", e => {
+                e.stopPropagation();
+                dropdownCarrito.classList.toggle("hidden");
+            });
+
+            document.addEventListener("click", () => {
+                dropdownCarrito.classList.add("hidden");
+            });
+
+            dropdownCarrito.addEventListener("click", e => e.stopPropagation());
+
+            // ---------------- ASIENTOS ----------------
             let asientosSeleccionados = [];
             const precioAsiento = parseInt("@Model.Ruta.Precio");
-            const formatoCOP = new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0 });
+            const formato = new Intl.NumberFormat("es-CO");
 
-            /* -----------------------------
-               ACTUALIZAR TOTAL EN PANTALLA
-            ------------------------------*/
-            function actualizarTotalUI() {
-                const total = asientosSeleccionados.length * precioAsiento;
-                document.getElementById('total').textContent = formatoCOP.format(total);
+            function actualizarTotal() {
+                document.getElementById("total").textContent =
+                    formato.format(asientosSeleccionados.length * precioAsiento);
             }
 
-            /* -----------------------------
-               SELECCIÓN DE ASIENTOS
-            ------------------------------*/
-            function initAsientos() {
-                document.querySelectorAll('.asiento').forEach(btn => {
+            document.querySelectorAll(".asiento").forEach(btn => {
+                btn.addEventListener("click", () => {
 
-                    btn.addEventListener('click', () => {
-                        if (btn.hasAttribute('disabled')) return;
+                    if (btn.disabled) return;
 
-                        const id = parseInt(btn.dataset.id);  // ← CORREGIDO (antes string)
-                        const codigo = String(btn.dataset.codigo); // ← CORREGIDO
+                    const id = parseInt(btn.dataset.id);
+                    const codigo = btn.dataset.codigo;
 
-                        const existe = asientosSeleccionados.some(a => a.id === id);
+                    const existe = asientosSeleccionados.some(a => a.id === id);
 
-                        if (existe) {
-                            // quitar selección
-                            asientosSeleccionados = asientosSeleccionados.filter(a => a.id !== id);
-                            btn.classList.remove('bg-blue-500');
-                            btn.classList.add('bg-green-500');
-                        } else {
-                            // agregar selección
-                            asientosSeleccionados.push({ id: id, codigo: codigo });
-                            btn.classList.remove('bg-green-500');
-                            btn.classList.add('bg-blue-500');
-                        }
+                    if (existe) {
+                        asientosSeleccionados = asientosSeleccionados.filter(a => a.id !== id);
+                        btn.classList.remove("bg-blue-600", "text-white");
+                        btn.classList.add("bg-white", "border-[#7a3e1d]", "text-[#7a3e1d]");
+                    } else {
+                        asientosSeleccionados.push({ id, codigo });
+                        btn.classList.remove("bg-white", "border-[#7a3e1d]", "text-[#7a3e1d]");
+                        btn.classList.add("bg-blue-600", "text-white");
+                    }
 
-                        actualizarTotalUI();
-                    });
-
+                    actualizarTotal();
                 });
-            }
+            });
 
-            /* -----------------------------
-               AGREGAR AL CARRITO
-            ------------------------------*/
-            async function agregarAlCarrito() {
+            // ---------------- AGREGAR AL CARRITO ----------------
+            document.getElementById("agregarCarrito").addEventListener("click", async () => {
 
                 if (asientosSeleccionados.length === 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Atención',
-                        text: 'Debes seleccionar al menos un asiento.'
-                    });
+                    Swal.fire("Atención", "Selecciona al menos un asiento", "warning");
                     return;
                 }
 
-                try {
-                    const dto = {
-                        RutaId: @Model.Ruta.RutaId,
-                        Asientos: asientosSeleccionados.map(a => ({
-                            Id: a.id,
-                            Codigo: a.codigo
-                        }))
-                    };
+                const dto = {
+                    RutaId: @Model.Ruta.RutaId,
+                    Asientos: asientosSeleccionados.map(a => a.codigo)
+                };
 
-                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const token = document.querySelector(
+                    'input[name="__RequestVerificationToken"]'
+                ).value;
 
-                    const response = await fetch('/Carrito/Agregar', {
-                        method: 'POST',
-                        headers: {
-                            "Content-Type": "application/json",
-                            "RequestVerificationToken": token
-                        },
-                        body: JSON.stringify(dto)
-                    });
+                const res = await fetch("/Carrito/Agregar", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": token
+                    },
+                    body: JSON.stringify(dto)
+                });
 
-                    const result = await response.json();
+                const json = await res.json();
 
-                    if (response.ok) {
+                if (!res.ok) {
+                    Swal.fire("Error", json.mensaje, "error");
+                    return;
+                }
 
-                        // Actualizar carrito visual
-                        const listaCarrito = document.getElementById('listaCarrito');
-                        const totalCarrito = document.getElementById('totalCarrito');
+                // ✅ ALERTA
+                Swal.fire("Listo", json.mensaje, "success");
 
-                        listaCarrito.innerHTML = "";
-                        dto.Asientos.forEach(a => {
-                            const li = document.createElement('li');
-                            li.textContent = a.Codigo;
-                            li.className = "text-gray-800 text-sm border-b pb-1";
-                            listaCarrito.appendChild(li);
-                        });
+                // ✅ TOTAL
+                document.getElementById("total").textContent =
+                    formato.format(json.total);
 
-                        const total = dto.Asientos.length * precioAsiento;
-                        totalCarrito.textContent = formatoCOP.format(total);
+                document.getElementById("totalCarrito").textContent =
+                    formato.format(json.total);
 
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Éxito!',
-                            text: result.mensaje,
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
+                // ✅ LISTA CARRITO
+                const lista = document.getElementById("listaCarrito");
+                lista.innerHTML = "";
 
-                        // Limpiar selección visual
-                        asientosSeleccionados = [];
-                        document.querySelectorAll('.asiento').forEach(btn => {
-                            if (!btn.hasAttribute('disabled')) {
-                                btn.classList.remove('bg-blue-500');
-                                btn.classList.add('bg-green-500');
-                            }
-                        });
+                json.asientos.forEach(codigo => {
+                    const li = document.createElement("li");
+                    li.textContent = `Asiento ${codigo}`;
+                    lista.appendChild(li);
 
-                        actualizarTotalUI();
+                    // 🔒 BLOQUEAR ASIENTO
+                    const btn = document.querySelector(
+                        `.asiento[data-codigo='${codigo}']`
+                    );
 
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: result.mensaje || "Error al agregar los asientos al carrito"
-                        });
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.classList.remove("bg-blue-600", "text-white");
+                        btn.classList.add(
+                            "bg-gray-300",
+                            "border-gray-300",
+                            "text-gray-500",
+                            "cursor-not-allowed"
+                        );
                     }
+                });
 
-                } catch (err) {
-                    console.error(err);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: "Error al agregar los asientos al carrito"
-                    });
-                }
-            }
-
-            /* -----------------------------
-               CARRITO DESPLEGABLE (HEADER)
-            ------------------------------*/
-            const btnCarrito = document.getElementById('btnCarrito');
-            const dropdownCarrito = document.getElementById('dropdownCarrito');
-
-            btnCarrito.addEventListener('click', () => {
-                dropdownCarrito.classList.toggle('hidden');
+                // ✅ LIMPIAR SELECCIÓN
+                asientosSeleccionados = [];
+                actualizarTotal();
             });
-
-            document.addEventListener('click', (e) => {
-                if (!btnCarrito.contains(e.target) && !dropdownCarrito.contains(e.target)) {
-                    dropdownCarrito.classList.add('hidden');
-                }
-            });
-
-            /* -----------------------------
-               INICIALIZACIÓN
-            ------------------------------*/
-            initAsientos();
-            actualizarTotalUI();
-            document.getElementById('agregarCarrito').addEventListener('click', agregarAlCarrito);
 
         })();
     </script>
-
 
 
 </body>

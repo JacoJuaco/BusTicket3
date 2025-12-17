@@ -1,7 +1,6 @@
-using System;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
 
 namespace Busticket.Models
 {
@@ -10,15 +9,23 @@ namespace Busticket.Models
         [Key]
         public int BoletoId { get; set; }
 
-        // Relación con IdentityUser (AspNetUsers)
+        public int VentaId { get; set; }
+        public Venta Venta { get; set; }
+
         public string UserId { get; set; }
         public IdentityUser User { get; set; }
 
-        // Relación con Itinerario
-        public int ItinerarioId { get; set; }
-        public Itinerario Itinerario { get; set; }
+        public int RutaId { get; set; }
+        public Ruta Ruta { get; set; }
 
-        public string? Asiento { get; set; }
+        public int AsientoId { get; set; }
+        public Asiento Asiento { get; set; }
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal Precio { get; set; }
+
         public DateTime FechaCompra { get; set; }
+
+        public string Codigo { get; set; }
     }
 }

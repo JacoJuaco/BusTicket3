@@ -72,7 +72,8 @@
                     </div>
                 </div>
 
-       
+                <input type="hidden" name="Total" value="@Model.Total" />
+
                 @if (Model.Asientos != null && Model.Asientos.Count > 0)
                 {
                     @foreach (var asiento in Model.Asientos)
@@ -82,9 +83,12 @@
                 }
 
                 <div class="mt-8">
-                    <button type="submit" class="w-36 h-12 rounded-full bg-[#284D67] text-white text-lg md:text-xl hover:opacity-50 transition duration-500">
+                    <button type="button"
+                            onclick="confirmarPago()"
+                            class="w-36 h-12 rounded-full bg-[#284D67] text-white text-lg md:text-xl hover:opacity-50 transition">
                         Pagar
                     </button>
+
                 </div>
             </form>
         </div>
@@ -116,14 +120,26 @@
 
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-        Swal.fire({
-            title: '¡Éxito!',
-            text: 'Pago realizado correctamente',
-            icon: 'success',
-            confirmButtonText: 'OK'
-        });
+        function confirmarPago() {
+            Swal.fire({
+                title: '¿Confirmar pago?',
+                text: '¿Deseas realizar el pago con los datos ingresados?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#284D67',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Sí, pagar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.querySelector('form').submit();
+                }
+            });
+        }
     </script>
+
 
 
 </body>

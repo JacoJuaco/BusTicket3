@@ -22,12 +22,13 @@ namespace Busticket.Data
         public DbSet<Asiento> Asiento { get; set; }
         public DbSet<Venta> Venta { get; set; }
         public DbSet<Ciudad> Ciudad { get; set; }
+        public DbSet<PasswordReset> PasswordReset { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // ---- Tablas en singular ----
+            // ---------------- TABLAS EN SINGULAR ----------------
             modelBuilder.Entity<Ruta>().ToTable("Ruta");
             modelBuilder.Entity<Empresa>().ToTable("Empresa");
             modelBuilder.Entity<Bus>().ToTable("Bus");
@@ -40,13 +41,14 @@ namespace Busticket.Data
             modelBuilder.Entity<Asiento>().ToTable("Asiento");
             modelBuilder.Entity<Venta>().ToTable("Venta");
             modelBuilder.Entity<Ciudad>().ToTable("Ciudad");
+            modelBuilder.Entity<PasswordReset>().ToTable("PasswordReset");
 
-            // Precio decimal
+            // ---------------- PROPIEDADES ----------------
             modelBuilder.Entity<Ruta>()
                 .Property(r => r.Precio)
                 .HasColumnType("decimal(18,2)");
 
-            // --- Relaciones Ruta ---
+            // ---------------- RUTA ----------------
             modelBuilder.Entity<Ruta>()
                 .HasOne(r => r.CiudadOrigen)
                 .WithMany()
@@ -59,7 +61,7 @@ namespace Busticket.Data
                 .HasForeignKey(r => r.CiudadDestinoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // --- Relaciones Itinerario ---
+            // ---------------- ITINERARIO ----------------
             modelBuilder.Entity<Itinerario>()
                 .HasOne(i => i.Ruta)
                 .WithMany()
@@ -70,22 +72,48 @@ namespace Busticket.Data
                 .HasOne(i => i.Bus)
                 .WithMany()
                 .HasForeignKey(i => i.BusId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Itinerario>()
                 .HasOne(i => i.Conductor)
                 .WithMany()
                 .HasForeignKey(i => i.ConductorId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // --- Relaciones Asiento ---
+            // ---------------- ASIENTO ----------------
             modelBuilder.Entity<Asiento>()
                 .HasOne(a => a.Ruta)
                 .WithMany(r => r.Asiento)
                 .HasForeignKey(a => a.RutaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ---------------- VENTA ----------------
+            modelBuilder.Entity<Venta>()
+                .HasOne(v => v.User)
+                .WithMany()
+                .HasForeignKey(v => v.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Venta>()
+                .HasOne(v => v.Empresa)
+                .WithMany()
+                .HasForeignKey(v => v.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Venta>()
+                .HasOne(v => v.Ruta)
+                .WithMany()
+                .HasForeignKey(v => v.RutaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ---------------- BOLETO ----------------
+            // ÚNICO CASCADE PERMITIDO
+            modelBuilder.Entity<Boleto>()
+                .HasOne(b => b.Venta)
+                .WithMany(v => v.Boletos)
+                .HasForeignKey(b => b.VentaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // --- Relaciones Boleto (IdentityUser) ---
             modelBuilder.Entity<Boleto>()
                 .HasOne(b => b.User)
                 .WithMany()
@@ -93,11 +121,18 @@ namespace Busticket.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Boleto>()
-                .HasOne(b => b.Itinerario)
+                .HasOne(b => b.Ruta)
                 .WithMany()
-                .HasForeignKey(b => b.ItinerarioId);
+                .HasForeignKey(b => b.RutaId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // --- Relaciones Resena (IdentityUser) ---
+            modelBuilder.Entity<Boleto>()
+                .HasOne(b => b.Asiento)
+                .WithMany()
+                .HasForeignKey(b => b.AsientoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ---------------- RESENA ----------------
             modelBuilder.Entity<Resena>()
                 .HasOne(r => r.User)
                 .WithMany()
@@ -107,35 +142,10 @@ namespace Busticket.Data
             modelBuilder.Entity<Resena>()
                 .HasOne(r => r.Ruta)
                 .WithMany()
-                .HasForeignKey(r => r.RutaId);
-
-            // --- Relaciones Venta ---
-            modelBuilder.Entity<Venta>()
-            .HasOne(v => v.User)
-             .WithMany()
-             .HasForeignKey(v => v.UserId)
-              .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Venta>()
-                .HasOne(v => v.Empresa)
-                .WithMany()
-                .HasForeignKey(v => v.EmpresaId)
+                .HasForeignKey(r => r.RutaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Venta>()
-                .HasOne(v => v.Asiento)
-                .WithMany()
-                .HasForeignKey(v => v.AsientoId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Venta>()
-                .HasOne(v => v.Ruta)
-                .WithMany()
-                .HasForeignKey(v => v.RutaId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-
-            // ---- Seed de Ciudades ----
+            // ---------------- SEED CIUDADES ----------------
             modelBuilder.Entity<Ciudad>().HasData(
                 new Ciudad { CiudadId = 1, Nombre = "Bogotá", Lat = 4.60971, Lng = -74.08175 },
                 new Ciudad { CiudadId = 2, Nombre = "Medellín", Lat = 6.2442, Lng = -75.58121 },

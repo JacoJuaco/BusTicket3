@@ -17,31 +17,40 @@ namespace Busticket.Controllers
             _context = context;
         }
 
-        // PANEL ADMIN
 
         public async Task<IActionResult> Index()
-    {
-        var reporte = await _context.Venta
-            .Include(v => v.User)        // propiedad correcta
-            .Include(v => v.Empresa)
-            .Include(v => v.Ruta)        // opcional
-            .ToListAsync();
-
-        var vm = reporte.Select(v => new ReporteVentaVM1
         {
-            VentaId = v.VentaId,
-            Usuario = v.User.UserName,
-            Empresa = v.Empresa.Nombre,
-            Fecha = v.Fecha
+            var reporte = await _context.Venta
+                .Include(v => v.User)
+                .Include(v => v.Empresa)
+                .Include(v => v.Ruta)
+                .GroupBy(v => new
+                {
+                    v.UserId,
+                    v.EmpresaId,
+                    v.RutaId,
+                    Fecha = v.Fecha.Date
+                })
+                .Select(g => new ReporteVentaVM1
+                {
+                    VentaId = g.Min(x => x.VentaId),
+                    Usuario = g.First().User.UserName,
+                    Empresa = g.First().Empresa.Nombre,
+                    Precio = g.Sum(x => x.Total), // ✅ TOTAL REAL
+                    Fecha = g.Key.Fecha
+                })
+                .OrderByDescending(x => x.Fecha)
+                .ToListAsync();
 
-        }).ToList();
-
-        return View(vm);
-    }
+            return View(reporte);
+        }
 
 
-    // LISTAR RUTAS
-    public async Task<IActionResult> Rutas()
+
+
+
+
+        public async Task<IActionResult> Rutas()
         {
             var rutas = await _context.Ruta
                 .Include(r => r.Empresa)
@@ -52,21 +61,19 @@ namespace Busticket.Controllers
             return View(rutas);
         }
 
-        // MÉTODO AUXILIAR PARA SELECTS
+
         private void CargarViewBags()
         {
             ViewBag.Ciudades = _context.Ciudad.ToList();
             ViewBag.Empresas = _context.Empresa.ToList();
         }
 
-        // CREAR RUTA (GET)
         public IActionResult CrearRuta()
         {
             CargarViewBags();
             return View(new Ruta());
         }
 
-        // CREAR RUTA (POST)
         [HttpPost]
         public IActionResult CrearRuta(Ruta ruta)
         {
@@ -85,7 +92,6 @@ namespace Busticket.Controllers
             _context.Ruta.Add(ruta);
             _context.SaveChanges();
 
-            // Crear 20 asientos automáticamente
             var asientos = Enumerable.Range(1, 20)
                                      .Select(i => new Asiento { Numero = i, RutaId = ruta.RutaId })
                                      .ToList();
@@ -97,7 +103,7 @@ namespace Busticket.Controllers
             return RedirectToAction("Rutas");
         }
 
-        // EDITAR RUTA (GET)
+
         public async Task<IActionResult> EditarRuta(int id)
         {
             var ruta = await _context.Ruta.FindAsync(id);
@@ -107,7 +113,7 @@ namespace Busticket.Controllers
             return View(ruta);
         }
 
-        // EDITAR RUTA (POST)
+
         [HttpPost]
         public async Task<IActionResult> EditarRuta(Ruta ruta)
         {
@@ -130,7 +136,7 @@ namespace Busticket.Controllers
             return RedirectToAction("Rutas");
         }
 
-        // ELIMINAR RUTA (GET)
+
         public async Task<IActionResult> EliminarRuta(int id)
         {
             var ruta = await _context.Ruta
@@ -144,7 +150,6 @@ namespace Busticket.Controllers
             return View(ruta);
         }
 
-        // ELIMINAR RUTA (POST)
         [HttpPost, ActionName("EliminarRuta")]
         public async Task<IActionResult> EliminarRutaConfirmado(int id)
         {

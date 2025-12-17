@@ -21,7 +21,7 @@ namespace Busticket.Data
 
             // 🔥 Crear usuario administrador por defecto
             string adminEmail = "admin@busticket.com";
-            string adminPassword = "Admin123@"; // Puedes cambiarlo luego
+            string adminPassword = "Admin123@"; 
 
             var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
 

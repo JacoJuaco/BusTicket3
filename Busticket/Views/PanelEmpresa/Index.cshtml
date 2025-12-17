@@ -1,5 +1,4 @@
-﻿@model Busticket.Models.Empresa
-
+﻿@model Busticket.Models.ViewModels.PanelEmpresaVM
 
 @{
     Layout = null;
@@ -41,22 +40,78 @@
 
     </div>
 
-    <!-- TABLA DE REPORTES -->
-    <h2 class="text-2xl font-bold mb-4 text-gray-700">Reporte de Ventas</h2>
+        <!-- FILTROS + EXCEL -->
+        <div class="bg-white p-5 rounded-xl shadow mb-6 flex flex-wrap gap-4 items-end">
 
-    <div class="overflow-x-auto">
-        <table class="w-full bg-white shadow-md rounded-lg overflow-hidden">
-            <thead class="bg-gray-200 text-gray-700">
-                <tr>
-                    <th class="px-4 py-2 text-left">Venta ID</th>
-                    <th class="px-4 py-2 text-left">Usuario</th>
-                    <th class="px-4 py-2 text-left">Empresa</th>
-                    <th class="px-4 py-2 text-left">Fecha</th>
-                </tr>
-            </thead>
+            <div>
+                <label class="block text-sm font-semibold text-gray-600">Desde</label>
+                <input type="date" id="fechaInicio"
+                       class="border rounded px-3 py-2 text-sm">
+            </div>
 
-           
-        </table>
+            <div>
+                <label class="block text-sm font-semibold text-gray-600">Hasta</label>
+                <input type="date" id="fechaFin"
+                       class="border rounded px-3 py-2 text-sm">
+            </div>
+
+            <button type="button"
+                    onclick="filtrarTabla()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                Filtrar
+            </button>
+
+            <button type="button"
+                    onclick="exportarExcel()"
+                    class="ml-auto bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                Descargar Excel
+            </button>
+        </div>
+
+        <!-- TABLA -->
+        <div class="overflow-x-auto">
+            <table id="tablaVentas"
+                   class="w-full bg-white shadow-md rounded-lg overflow-hidden">
+
+                <thead class="bg-gray-200 text-gray-700">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Venta ID</th>
+                        <th class="px-4 py-2 text-left">Usuario</th>
+                        <th class="px-4 py-2 text-left">Empresa</th>
+                        <th class="px-4 py-2 text-left">Fecha</th>
+                    </tr>
+                </thead>
+            <tbody>
+                @foreach (var item in Model.Ventas)
+                {
+                    <tr class="border-b hover:bg-gray-50 transition"
+                        data-fecha="@item.Fecha.ToString("yyyy-MM-dd")">
+
+                        <td class="px-4 py-2">@item.VentaId</td>
+
+                        <td class="px-4 py-2">
+                            @item.User?.UserName
+                        </td>
+
+                        <td class="px-4 py-2">
+                            @item.Empresa?.Nombre
+                        </td>
+
+                        <td class="px-4 py-2">
+                            @item.Fecha.ToString("dd/MM/yyyy")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+
+            </table>
+        </div>
+
+    </div>
+
+    <script src="~/js/admin.js"></script>
+
     </div>
 
 </div>
