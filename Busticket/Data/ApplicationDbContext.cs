@@ -24,6 +24,7 @@ namespace Busticket.Data
         public DbSet<Ciudad> Ciudad { get; set; }
         public DbSet<PasswordReset> PasswordReset { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
